@@ -59,8 +59,7 @@ class ConvertMVSEC(ConvertBase):
         """Initializes writers.
         """
         self.events_writer = WriterEvents(self.out_dir)
-        # TODO: Requires later initialization
-        # self.gray_writer = WriterGray(self.out_dir)
+        self.gray_writer = WriterGray(self.out_dir)
 
     def _init_events_stride(self, events_stride: int = 1e4) -> None:
         """Initializes events stride.
@@ -70,6 +69,12 @@ class ConvertMVSEC(ConvertBase):
         if self.events_indices[-1] != self.events.shape[0] - 1:
             self.events_indices = np.append(self.events_indices, self.events.shape[0] - 1)
         self.events_size = len(self.events_indices) - 1
+
+    def _init_gray_stride(self) -> None:
+        """Initializes grayscale stride.
+        """
+        self.gray_indices = np.arange(0, self.gray_images.shape[0])
+        self.gray_size = len(self.gray_indices)
 
     def convert(self, events_stride: int = 1e4) -> None:
         """Converts MVSEC data.
@@ -86,4 +91,14 @@ class ConvertMVSEC(ConvertBase):
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
         # Map time to events
-        self.events_writer.map_time_to_events()
+        # self.events_writer.map_time_to_events()
+
+        print("# === Converting Grayscale Images === #")
+        self._init_gray_stride()
+        progress_bar = tqdm(range(self.gray_size))
+        for i in progress_bar:
+            gray_image = self.gray_images[i]
+            time = self.gray_time[i]*1e6
+            self.gray_writer.write(gray_image, time)
+        # Map time to grayscale images
+        self.gray_writer.map_time_to_gray()

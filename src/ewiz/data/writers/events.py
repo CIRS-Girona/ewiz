@@ -35,6 +35,7 @@ class WriterEvents(WriterBase):
                 self._save_time_offset(
                     data_file=self.events_file, time=events[0, 2]
                 )
+                self.time_offset = events[0, 2]
 
             # Create HDF5 groups
             self.events_x = self.events_group.create_dataset(
@@ -81,7 +82,7 @@ class WriterEvents(WriterBase):
         data_file = self.events_file
         data_name = "time_to_events"
         offset_value = 0
-        side = "right"
+        side = "left"
         chunks = 75e3
         addition = 0.0
         division = 1e3

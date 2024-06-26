@@ -15,6 +15,7 @@ class WriterGray(WriterBase):
     """
     def __init__(self, out_dir: str) -> None:
         super().__init__(out_dir)
+        self._init_events()
         self._init_gray()
 
     def _init_events(self) -> None:
@@ -23,10 +24,6 @@ class WriterGray(WriterBase):
         self.events_path = os.path.join(self.out_dir, "events.hdf5")
         self.events_file = h5py.File(self.events_path, "a")
         self.events_flag = False
-        # TODO: Check group creation method
-        self.events_group = self.events_file["events"]
-        self.events_time = self.events_group["time"]
-        self.events_time_offset = self.events_file["time_offset"]
 
     def _init_gray(self) -> None:
         """Initializes grayscale images file.
@@ -39,7 +36,6 @@ class WriterGray(WriterBase):
         """Main data writing function.
         """
         gray_image = gray_image[None, ...].astype(np.uint8)
-        time: np.ndarray = np.array(time, dtype=np.int64)[None, ...]
         image_size = (gray_image.shape[1], gray_image.shape[2])
 
         # TODO: Check time format
@@ -47,6 +43,7 @@ class WriterGray(WriterBase):
             self.time_offset = 0
             if time != 0:
                 self._save_time_offset(data_file=self.gray_file, time=time)
+                self.time_offset = time
 
             # Create HDF5 groups
             self.gray_images = self.gray_file.create_dataset(
@@ -54,6 +51,7 @@ class WriterGray(WriterBase):
                 chunks=True, maxshape=(None, *image_size), dtype=np.uint8,
                 **self.compressor
             )
+            time: np.ndarray = np.array(time, dtype=np.int64)[None, ...]
             self.gray_time = self.gray_file.create_dataset(
                 name="time", data=time - self.time_offset,
                 chunks=True, maxshape=(None,), dtype=np.int64,
@@ -69,16 +67,20 @@ class WriterGray(WriterBase):
             self.gray_time.resize(all_points, axis=0)
             self.gray_time[-data_points:] = time - self.time_offset
 
+    # TODO: Big values need fixing
     def map_time_to_gray(self) -> None:
         """Maps timestamps to grayscale indices.
         """
+        events_group = self.events_file["events"]
+        events_time = events_group["time"]
+        events_time_offset = self.events_file["time_offset"]
         print("# === Mapping Timestamps to Grayscale Indices === #")
-        start_value = np.floor(self.events_time[0]/1e3)
-        end_value = np.ceil(self.events_time[-1]/1e3)
-        sorted_data = (self.gray_time + self.time_offset)/1e3
+        start_value = np.floor(events_time[0]/1e3)
+        end_value = np.ceil(events_time[-1]/1e3)
+        sorted_data = (self.gray_time[:] + 0)/1e3
         data_file = self.gray_file
         data_name = "time_to_gray"
-        offset_value = self.events_time_offset
+        offset_value = 0
 
         # TODO: Review arguments
         self.map_data_in_memory(
