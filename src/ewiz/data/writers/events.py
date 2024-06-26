@@ -15,6 +15,16 @@ class WriterEvents(WriterBase):
     """
     def __init__(self, out_dir: str) -> None:
         super().__init__(out_dir)
+        self._init_events()
+
+    def _init_events(self) -> None:
+        """Initializes events HDF5 file.
+        """
+        self.events_path = os.path.join(self.out_dir, "events.hdf5")
+        self.events_file = h5py.File(self.events_path, "a")
+        self.events_flag = False
+        # TODO: Check group creation method
+        self.events_group = self.events_file.create_group("events")
 
     def write(self, events: np.ndarray) -> None:
         """Main data writing function.
@@ -38,7 +48,7 @@ class WriterEvents(WriterBase):
                 **self.compressor
             )
             self.events_time = self.events_group.create_dataset(
-                name="time", data=events[:, 2],
+                name="time", data=events[:, 2] - self.time_offset,
                 chunks=True, maxshape=(None,), dtype=np.int64,
                 **self.compressor
             )
@@ -57,23 +67,9 @@ class WriterEvents(WriterBase):
             self.events_y.resize(all_points, axis=0)
             self.events_y[-data_points:] = events[:, 1]
             self.events_time.resize(all_points, axis=0)
-            self.events_time[-data_points:] = events[:, 2]
+            self.events_time[-data_points:] = events[:, 2] - self.time_offset
             self.events_pol.resize(all_points, axis=0)
             self.events_pol[-data_points:] = events[:, 3]
-
-    def _init_events(self) -> None:
-        """Initializes events HDF5 file.
-        """
-        self.events_path = os.path.join(self.out_dir, "events.hdf5")
-        self.events_file = h5py.File(self.events_path, "a")
-        self.events_flag = False
-
-        # Placeholder variables
-        self.events_group: h5py.File = None
-        self.events_x: h5py.Dataset = None
-        self.events_y: h5py.Dataset = None
-        self.events_time: h5py.Dataset = None
-        self.events_pol: h5py.Dataset = None
 
     def map_time_to_events(self) -> None:
         """Maps timestamps to events indices.
@@ -82,9 +78,9 @@ class WriterEvents(WriterBase):
         start_value = np.floor(self.events_time[0]/1e3)
         end_value = np.ceil(self.events_time[-1]/1e3)
         sorted_data = self.events_time
-        data_file = None
-        data_name = None
-        offset_value = None
+        data_file = self.events_file
+        data_name = "time_to_events"
+        offset_value = 0
         side = "right"
         chunks = 75e3
         addition = 0.0
