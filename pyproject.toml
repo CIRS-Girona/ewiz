@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name = "ewiz"
+version = "1.0.0"
+authors = [{name = "Jad Mansour", email = "jad.mansour@udg.edu"}]
+maintainers = [{name = "Jad Mansour", email = "jad.mansour@udg.edu"}]
+dependencies = [
+    "numpy",
+    "h5py",
+    "hdf5plugin",
+    "natsort",
+    "tqdm",
+    "matplotlib",
+    "opencv-python",
+    "pillow",
+    "scipy",
+    "scikit-image",
+    "tonic",
+    "autograd-minimize",
+    "inverse_optical_flow",
+    "flow_vis"
+]
+requires-python = ">= 3.8"
+description = "An all-in-one event-based data manipulation and processing library."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "events",
+]
+classifiers = []
+
+[project.urls]
+Homepage = "https://google.com"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com"
+Issues = "https://github.com"
+Changelog = "https://github.com"
