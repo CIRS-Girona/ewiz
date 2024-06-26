@@ -13,6 +13,7 @@ class WriterBase():
     """
     def __init__(self, out_dir: str) -> None:
         self.out_dir = out_dir
+        self._init_compressor()
 
     def write(self, *args, **kwargs) -> None:
         """Main data writing function.

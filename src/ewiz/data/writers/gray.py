@@ -17,6 +17,17 @@ class WriterGray(WriterBase):
         super().__init__(out_dir)
         self._init_gray()
 
+    def _init_events(self) -> None:
+        """Initializes events HDF5 file.
+        """
+        self.events_path = os.path.join(self.out_dir, "events.hdf5")
+        self.events_file = h5py.File(self.events_path, "a")
+        self.events_flag = False
+        # TODO: Check group creation method
+        self.events_group = self.events_file["events"]
+        self.events_time = self.events_group["time"]
+        self.events_time_offset = self.events_file["time_offset"]
+
     def _init_gray(self) -> None:
         """Initializes grayscale images file.
         """
@@ -57,3 +68,38 @@ class WriterGray(WriterBase):
             self.gray_images[-data_points:] = gray_image
             self.gray_time.resize(all_points, axis=0)
             self.gray_time[-data_points:] = time - self.time_offset
+
+    def map_time_to_gray(self) -> None:
+        """Maps timestamps to grayscale indices.
+        """
+        print("# === Mapping Timestamps to Grayscale Indices === #")
+        start_value = np.floor(self.events_time[0]/1e3)
+        end_value = np.ceil(self.events_time[-1]/1e3)
+        sorted_data = (self.gray_time + self.time_offset)/1e3
+        data_file = self.gray_file
+        data_name = "time_to_gray"
+        offset_value = self.events_time_offset
+
+        # TODO: Review arguments
+        self.map_data_in_memory(
+            start_value, end_value, sorted_data,
+            data_file, data_name, offset_value
+        )
+
+    # TODO: Check how to implement
+    def map_gray_to_events(self) -> None:
+        """Maps grayscale indices to events indices.
+        """
+        print("# === Mapping Grayscale Indices to Events Indices === #")
+        start_value = 0
+        end_value = self.gray_images.shape[0]
+        sorted_data = None
+        data_file = self.gray_file
+        data_name = "gray_to_events"
+        offset_value = None
+
+        # TODO: Review arguments
+        self.map_data_in_memory(
+            start_value, end_value, sorted_data,
+            data_file, data_name, offset_value
+        )
