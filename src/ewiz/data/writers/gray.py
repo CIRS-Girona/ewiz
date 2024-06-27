@@ -87,20 +87,29 @@ class WriterGray(WriterBase):
             data_file, data_name, offset_value
         )
 
-    # TODO: Check how to implement
+    # TODO: Check value difference
     def map_gray_to_events(self) -> None:
         """Maps grayscale indices to events indices.
         """
+        events_group = self.events_file["events"]
+        events_time = events_group["time"]
+        events_time_offset = self.events_file["time_offset"]
         print("# === Mapping Grayscale Indices to Events Indices === #")
-        start_value = 0
-        end_value = self.gray_images.shape[0]
-        sorted_data = None
+        start_value = None
+        end_value = None
+        sorted_data = events_time
         data_file = self.gray_file
         data_name = "gray_to_events"
-        offset_value = None
+        offset_value = self.time_offset
+        side = "left"
+        chunks = 32
+        addition = events_time_offset[0]
+        division = 1.0
+        array_value = self.gray_time[:]
 
         # TODO: Review arguments
-        self.map_data_in_memory(
+        self.map_data_out_memory(
             start_value, end_value, sorted_data,
-            data_file, data_name, offset_value
+            data_file, data_name, offset_value, side, chunks,
+            addition, division, array_value
         )

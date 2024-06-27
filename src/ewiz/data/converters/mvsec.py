@@ -111,3 +111,4 @@ class ConvertMVSEC(ConvertBase):
             self.gray_writer.write(gray_image, time)
         # Map time to grayscale images
         self.gray_writer.map_time_to_gray()
+        self.gray_writer.map_gray_to_events()

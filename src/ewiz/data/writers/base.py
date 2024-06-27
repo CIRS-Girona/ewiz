@@ -86,12 +86,13 @@ class WriterBase():
         side: str = "left",
         chunks: int = 32,
         addition: float = 0.0,
-        division: float = 1.0
+        division: float = 1.0,
+        array_value: np.ndarray = None
     ) -> None:
         """Maps data without loading it all to memory.
         """
         start_flag = False
-        all_values = np.arange(start_value, end_value)
+        all_values = np.arange(start_value, end_value) if array_value is None else array_value
         num_values = all_values.shape[0]
         progress_bar = tqdm(range(num_values))
         for i in progress_bar:
