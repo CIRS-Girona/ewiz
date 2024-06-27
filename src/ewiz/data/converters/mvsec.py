@@ -105,8 +105,9 @@ class ConvertMVSEC(ConvertBase):
         for i in progress_bar:
             start = int(self.events_indices[i])
             end = int(self.events_indices[i + 1])
-            events = self.events[start:end]
+            events = self.events[start:end + 1]
             events[:, 2] = events[:, 2]*1e6 - self.min_time
+            events[events[:, 3] < 0, 3] = 0
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
         # Map time to events

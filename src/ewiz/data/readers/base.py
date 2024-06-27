@@ -17,6 +17,15 @@ class ReaderBase():
         self._init_events()
         self._init_gray()
 
+    def __getitem__(self, indices: Union[int, slice]) -> Tuple[np.ndarray]:
+        """Returns data based on slice.
+        """
+        if isinstance(indices, slice):
+            start, stop, _ = indices.indices(self.events_size)
+            return self._get_events_data(start, stop)
+        elif isinstance(indices, int):
+            return self._get_events_data(indices)
+
     def _init_events(self) -> None:
         """Initializes events file.
         """
@@ -31,8 +40,9 @@ class ReaderBase():
         self.events_pol = self.events_group["polarity"]
 
         # Events data properties
-        self.events_time_offset = self.events_file["time_offset"]
+        self.events_time_offset = self.events_file["time_offset"][0]
         self.time_to_events = self.events_file["time_to_events"]
+        self.events_size = self.events_x.shape[0]
 
     def _init_gray(self) -> None:
         """Initializes grayscale images.
@@ -47,9 +57,45 @@ class ReaderBase():
             self.gray_time = self.gray_file["time"]
 
             # Grayscale images properties
-            self.gray_time_offset = self.gray_file["time_offset"]
+            self.gray_time_offset = self.gray_file["time_offset"][0]
             self.time_to_gray = self.gray_file["time_to_gray"]
             self.gray_to_events = self.gray_file["gray_to_events"]
 
             # Grayscale flag
             self.gray_flag = True
+
+    def _get_events_data(self, start_index: int, end_index: int = None) -> np.ndarray:
+        """Combines events data.
+        """
+        if end_index is not None:
+            shape = (end_index - start_index, 4)
+            events = np.zeros(shape, dtype=np.float64)
+            events[:, 0] = self.events_x[start_index:end_index]
+            events[:, 1] = self.events_y[start_index:end_index]
+            events[:, 2] = self.events_time[start_index:end_index] + self.events_time_offset
+            events[:, 3] = self.events_pol[start_index:end_index]
+            return events
+        else:
+            shape = (1, 4)
+            events = np.zeros(shape, dtype=np.float64)
+            events[:, 0] = self.events_x[start_index]
+            events[:, 1] = self.events_y[start_index]
+            events[:, 2] = self.events_time[start_index] + self.events_time_offset
+            events[:, 3] = self.events_pol[start_index]
+            return events
+
+    # TODO: Check return type
+    def _get_gray_images(self, start_index: int, end_index: int = None) -> np.ndarray:
+        """Gets grayscale images.
+        """
+        if self.gray_flag:
+            if end_index is None:
+                gray_image = self.gray_images[start_index]
+                time = self.gray_time[start_index] + self.gray_time_offset
+                return gray_image, time
+            else:
+                gray_image = self.gray_images[start_index:end_index]
+                time = self.gray_time[start_index:end_index] + self.gray_time_offset
+                return gray_image, time
+        else:
+            return None, None
