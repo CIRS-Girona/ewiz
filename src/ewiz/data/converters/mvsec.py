@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 from .base import ConvertBase
-from ..writers import WriterEvents, WriterGray
+from ..writers import WriterEvents, WriterGray, WriterFlow
 
 from typing import Any, Dict, List, Tuple, Callable, Union
 
@@ -61,6 +61,7 @@ class ConvertMVSEC(ConvertBase):
         """
         self.events_writer = WriterEvents(self.out_dir)
         self.gray_writer = WriterGray(self.out_dir)
+        self.flow_writer = WriterFlow(self.out_dir)
 
     def _init_events_stride(self, events_stride: int = 1e4) -> None:
         """Initializes events stride.
@@ -77,13 +78,22 @@ class ConvertMVSEC(ConvertBase):
         self.gray_indices = np.arange(0, self.gray_images.shape[0])
         self.gray_size = len(self.gray_indices)
 
+    def _init_gt_stride(self) -> None:
+        """Initializes ground truth stride.
+        """
+        self.gt_indices = np.arange(0, self.gt_flows.shape[0])
+        self.gt_size = len(self.gt_indices)
+
     def _get_min_time(self) -> None:
         """Gets minimum timestamp.
         """
         self.min_time = int(self.events[0, 2]*1e6)
         gray_min_time = int(self.gray_time[0]*1e6)
+        gt_min_time = int(self.gt_time[0]*1e6)
         if gray_min_time < self.min_time:
             self.min_time = gray_min_time
+        if gt_min_time < self.min_time:
+            self.min_time = gt_min_time
 
     def convert(self, events_stride: int = 1e4) -> None:
         """Converts MVSEC data.
@@ -112,3 +122,11 @@ class ConvertMVSEC(ConvertBase):
         # Map time to grayscale images
         self.gray_writer.map_time_to_gray()
         self.gray_writer.map_gray_to_events()
+
+        print("# === Converting Ground Truth Flows === #")
+        self._init_gt_stride()
+        progress_bar = tqdm(range(self.gt_size))
+        for i in progress_bar:
+            flow = self.gt_flows[i]
+            time = self.gt_time[i]*1e6 - self.min_time
+            self.flow_writer.write(flow, time)
