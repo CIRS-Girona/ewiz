@@ -22,6 +22,7 @@ class ConvertMVSEC(ConvertBase):
         super().__init__(data_dir, out_dir)
         self._init_gt()
         self._init_writers()
+        self._get_min_time()
 
     def _init_events(self) -> None:
         """Initializes events file path.
@@ -76,6 +77,14 @@ class ConvertMVSEC(ConvertBase):
         self.gray_indices = np.arange(0, self.gray_images.shape[0])
         self.gray_size = len(self.gray_indices)
 
+    def _get_min_time(self) -> None:
+        """Gets minimum timestamp.
+        """
+        self.min_time = int(self.events[0, 2]*1e6)
+        gray_min_time = int(self.gray_time[0]*1e6)
+        if gray_min_time < self.min_time:
+            self.min_time = gray_min_time
+
     def convert(self, events_stride: int = 1e4) -> None:
         """Converts MVSEC data.
         """
@@ -87,7 +96,7 @@ class ConvertMVSEC(ConvertBase):
             start = int(self.events_indices[i])
             end = int(self.events_indices[i + 1])
             events = self.events[start:end]
-            events[:, 2] = events[:, 2]*1e6
+            events[:, 2] = events[:, 2]*1e6 - self.min_time
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
         # Map time to events
@@ -98,7 +107,7 @@ class ConvertMVSEC(ConvertBase):
         progress_bar = tqdm(range(self.gray_size))
         for i in progress_bar:
             gray_image = self.gray_images[i]
-            time = self.gray_time[i]*1e6
+            time = self.gray_time[i]*1e6 - self.min_time
             self.gray_writer.write(gray_image, time)
         # Map time to grayscale images
         self.gray_writer.map_time_to_gray()

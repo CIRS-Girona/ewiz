@@ -133,9 +133,6 @@ class WriterBase():
         progress_bar = tqdm(range(num_values))
         for i in progress_bar:
             target_value = all_values[i] + offset_value
-            print("Sorted:", sorted_data)
-            print("Target:", target_value)
-            print("Difference:", sorted_data[0] - target_value)
             search_index = np.searchsorted(sorted_data, target_value, side="right")
             search_index = np.array(search_index, dtype=np.int64)[None, ...]
 

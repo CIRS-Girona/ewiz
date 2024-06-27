@@ -42,8 +42,8 @@ class WriterGray(WriterBase):
         if self.gray_flag is False:
             self.time_offset = 0
             if time != 0:
-                self._save_time_offset(data_file=self.gray_file, time=time)
                 self.time_offset = time
+            self._save_time_offset(data_file=self.gray_file, time=time)
 
             # Create HDF5 groups
             self.gray_images = self.gray_file.create_dataset(
@@ -67,7 +67,6 @@ class WriterGray(WriterBase):
             self.gray_time.resize(all_points, axis=0)
             self.gray_time[-data_points:] = time - self.time_offset
 
-    # TODO: Big values need fixing
     def map_time_to_gray(self) -> None:
         """Maps timestamps to grayscale indices.
         """
@@ -77,10 +76,10 @@ class WriterGray(WriterBase):
         print("# === Mapping Timestamps to Grayscale Indices === #")
         start_value = np.floor(events_time[0]/1e3)
         end_value = np.ceil(events_time[-1]/1e3)
-        sorted_data = (self.gray_time[:] + 0)/1e3
+        sorted_data = (self.gray_time[:] + self.time_offset)/1e3
         data_file = self.gray_file
         data_name = "time_to_gray"
-        offset_value = 0
+        offset_value = events_time_offset[0]
 
         # TODO: Review arguments
         self.map_data_in_memory(

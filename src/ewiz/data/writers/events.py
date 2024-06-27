@@ -32,10 +32,10 @@ class WriterEvents(WriterBase):
         if self.events_flag is False:
             self.time_offset = 0
             if events[0, 2] != 0:
-                self._save_time_offset(
-                    data_file=self.events_file, time=events[0, 2]
-                )
                 self.time_offset = events[0, 2]
+            self._save_time_offset(
+                data_file=self.events_file, time=self.time_offset
+            )
 
             # Create HDF5 groups
             self.events_x = self.events_group.create_dataset(
