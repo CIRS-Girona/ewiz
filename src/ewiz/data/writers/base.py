@@ -59,7 +59,7 @@ class WriterBase():
             middle = (lower + upper)//2
             start_index = int(sample_indices[middle])
             end_index = int(sample_indices[middle + 1])
-            data_chunk: np.ndarray = (data[start_index:end_index] + addition)/division
+            data_chunk: np.ndarray = (data[start_index:end_index + 1] + addition)/division
             data_samples = data_chunk.shape[0]
             left = np.searchsorted(data_chunk, target, side="left")
             right = np.searchsorted(data_chunk, target, side="right")

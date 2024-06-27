@@ -100,7 +100,7 @@ class ConvertMVSEC(ConvertBase):
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
         # Map time to events
-        # self.events_writer.map_time_to_events()
+        self.events_writer.map_time_to_events()
 
         print("# === Converting Grayscale Images === #")
         self._init_gray_stride()
