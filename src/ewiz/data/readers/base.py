@@ -11,12 +11,16 @@ class ReaderBase():
     """
     def __init__(
         self,
-        data_dir: str
+        data_dir: str,
+        clip_mode: str = "events"
     ) -> None:
         self.data_dir = data_dir
+        self.clip_mode = clip_mode
         self._init_events()
         self._init_gray()
+        self._init_clip()
 
+    # TODO: Modify based on clipping mode
     def __getitem__(self, indices: Union[int, slice]) -> Tuple[np.ndarray]:
         """Returns data based on slice.
         """
@@ -99,3 +103,59 @@ class ReaderBase():
                 return gray_image, time
         else:
             return None, None
+
+    def _init_clip(self) -> None:
+        """Initializes clipping function.
+        """
+        self.clip_func = getattr(self, "_clip_with_" + self.clip_mode)
+
+    def _clip_with_events(self, start_index: int, end_index: int = None) -> Tuple[np.ndarray]:
+        """Clips data with events indices.
+        """
+        if end_index is not None:
+            events = self._get_events_data(start_index, end_index)
+            start_time = int((events[0, 2] - self.events_time_offset)/1e3)
+            end_time = int((events[-1, 2] - self.events_time_offset)/1e3)
+            start_gray = int(self.time_to_gray[start_time])
+            end_gray = int(self.time_to_gray[end_time])
+            gray_images, gray_time = self._get_gray_images(start_gray, end_gray)
+            return events, gray_images, gray_time
+        else:
+            events = self._get_events_data(start_index)
+            start_time = int((events[0, 2] - self.events_time_offset)/1e3)
+            start_gray = int(self.time_to_gray[start_time])
+            gray_images, gray_time = self._get_gray_images(start_gray)
+            return events, gray_images, gray_time
+
+    def _clip_with_time(self, start_time: int, end_time: int = None) -> Tuple[np.ndarray]:
+        """Clips data with timestamps.
+        """
+        if end_time is not None:
+            start_index = int(self.time_to_events[start_time])
+            end_index = int(self.time_to_events[end_time])
+            events = self._get_events_data(start_index, end_index)
+            start_index = int(self.time_to_gray[start_time])
+            end_index = int(self.time_to_gray[end_time])
+            gray_images, gray_time = self._get_gray_images(start_index, end_index)
+            return events, gray_images, gray_time
+        else:
+            start_index = int(self.time_to_events[start_time])
+            events = self._get_events_data(start_index)
+            start_index = int(self.time_to_gray[start_time])
+            gray_images, gray_time = self._get_gray_images(start_index)
+            return events, gray_images, gray_time
+
+    def _clip_with_images(self, start_index: int, end_index: int = None) -> Tuple[np.ndarray]:
+        """Clips data with images.
+        """
+        if start_index is not None:
+            start_events = int(self.gray_to_events[start_index])
+            end_events = int(self.gray_to_events[end_index])
+            events = self._get_events_data(start_events, end_events)
+            gray_images, gray_time = self._get_gray_images(start_index, end_index)
+            return events, gray_images, gray_time
+        else:
+            start_events = int(self.gray_to_events[start_index])
+            events = self._get_events_data(start_events)
+            gray_images, gray_time = self._get_gray_images(start_index)
+            return events, gray_images, gray_time
