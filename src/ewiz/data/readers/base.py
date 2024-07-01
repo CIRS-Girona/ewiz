@@ -6,6 +6,7 @@ import numpy as np
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
+# TODO: Revise indexing of grayscale images
 class ReaderBase():
     """Base data reader.
     """
@@ -25,10 +26,36 @@ class ReaderBase():
         """Returns data based on slice.
         """
         if isinstance(indices, slice):
-            start, stop, _ = indices.indices(self.events_size)
-            return self._get_events_data(start, stop)
+            start, stop = self._get_slice_indices(indices)
+            data = self.clip_func(start, stop)
+            return data
         elif isinstance(indices, int):
-            return self._get_events_data(indices)
+            index = self._get_int_index(indices)
+            data = self.clip_func(index)
+            return data
+        else:
+            raise TypeError("Invalid slice.")
+
+    def _get_slice_indices(self, indices: slice) -> Tuple[int, int]:
+        """Returns slice indices depending on clip mode.
+        """
+        size = getattr(self, self.clip_mode + "_size")
+        start, stop, _ = indices.indices(size)
+        assert (start >= 0 and start < size) and (stop >= 0 and stop < size), (
+            f"Slice indices out of range for data size of '{size}'. "
+            "Check your slice indices."
+        )
+        return start, stop
+
+    def _get_int_index(self, index: int) -> int:
+        """Returns integer index depending on clip mode.
+        """
+        size = getattr(self, self.clip_mode + "_size")
+        assert (index >= 0 and index < size), (
+            f"Integer index out of range for data size of '{size}'. "
+            "Check your integer index."
+        )
+        return index
 
     def _init_events(self) -> None:
         """Initializes events file.
@@ -47,6 +74,8 @@ class ReaderBase():
         self.events_time_offset = self.events_file["time_offset"][0]
         self.time_to_events = self.events_file["time_to_events"]
         self.events_size = self.events_x.shape[0]
+        self.time_size = self.time_to_events.shape[0]
+        self.images_size = None
 
     def _init_gray(self) -> None:
         """Initializes grayscale images.
@@ -64,6 +93,7 @@ class ReaderBase():
             self.gray_time_offset = self.gray_file["time_offset"][0]
             self.time_to_gray = self.gray_file["time_to_gray"]
             self.gray_to_events = self.gray_file["gray_to_events"]
+            self.images_size = self.gray_to_events.shape[0]
 
             # Grayscale flag
             self.gray_flag = True
@@ -116,14 +146,24 @@ class ReaderBase():
             events = self._get_events_data(start_index, end_index)
             start_time = int((events[0, 2] - self.events_time_offset)/1e3)
             end_time = int((events[-1, 2] - self.events_time_offset)/1e3)
-            start_gray = int(self.time_to_gray[start_time])
-            end_gray = int(self.time_to_gray[end_time])
+            # TODO: Organize indexing
+            start_gray = (
+                int(self.time_to_gray[start_time] - 1)
+                if self.time_to_gray[start_time] > 0
+                else int(self.time_to_gray[start_time])
+            )
+            end_gray = int(self.time_to_gray[end_time] + 1)
             gray_images, gray_time = self._get_gray_images(start_gray, end_gray)
             return events, gray_images, gray_time
         else:
             events = self._get_events_data(start_index)
             start_time = int((events[0, 2] - self.events_time_offset)/1e3)
-            start_gray = int(self.time_to_gray[start_time])
+            # TODO: Organize indexing
+            start_gray = (
+                int(self.time_to_gray[start_time] - 1)
+                if self.time_to_gray[start_time] > 0
+                else int(self.time_to_gray[start_time])
+            )
             gray_images, gray_time = self._get_gray_images(start_gray)
             return events, gray_images, gray_time
 
@@ -134,25 +174,35 @@ class ReaderBase():
             start_index = int(self.time_to_events[start_time])
             end_index = int(self.time_to_events[end_time])
             events = self._get_events_data(start_index, end_index)
-            start_index = int(self.time_to_gray[start_time])
-            end_index = int(self.time_to_gray[end_time])
+            # TODO: Organize indexing
+            start_index = (
+                int(self.time_to_gray[start_time] - 1)
+                if self.time_to_gray[start_time] > 0
+                else int(self.time_to_gray[start_time])
+            )
+            end_index = int(self.time_to_gray[end_time] + 1)
             gray_images, gray_time = self._get_gray_images(start_index, end_index)
             return events, gray_images, gray_time
         else:
             start_index = int(self.time_to_events[start_time])
             events = self._get_events_data(start_index)
-            start_index = int(self.time_to_gray[start_time])
+            # TODO: Organize indexing
+            start_index = (
+                int(self.time_to_gray[start_time] - 1)
+                if self.time_to_gray[start_time] > 0
+                else int(self.time_to_gray[start_time])
+            )
             gray_images, gray_time = self._get_gray_images(start_index)
             return events, gray_images, gray_time
 
     def _clip_with_images(self, start_index: int, end_index: int = None) -> Tuple[np.ndarray]:
         """Clips data with images.
         """
-        if start_index is not None:
+        if end_index is not None:
             start_events = int(self.gray_to_events[start_index])
             end_events = int(self.gray_to_events[end_index])
             events = self._get_events_data(start_events, end_events)
-            gray_images, gray_time = self._get_gray_images(start_index, end_index)
+            gray_images, gray_time = self._get_gray_images(start_index, end_index + 1)
             return events, gray_images, gray_time
         else:
             start_events = int(self.gray_to_events[start_index])
