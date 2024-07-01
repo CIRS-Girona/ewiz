@@ -32,6 +32,7 @@ class WriterFlow(WriterBase):
         self.flow_file = h5py.File(self.flow_path, "a")
         self.flow_flag = False
 
+    # TODO: Check data type
     def write(self, flow: np.ndarray, time: int) -> None:
         """Main data writing function.
         """
