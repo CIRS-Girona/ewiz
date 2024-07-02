@@ -36,7 +36,7 @@ class WriterFlow(WriterBase):
     def write(self, flow: np.ndarray, time: int) -> None:
         """Main data writing function.
         """
-        flow = flow[None, ...].astype(np.uint8)
+        flow = flow[None, ...].astype(np.float64)
         image_size = (flow.shape[2], flow.shape[3])
 
         # TODO: Check time format
@@ -67,3 +67,50 @@ class WriterFlow(WriterBase):
             self.flows[-data_points:] = flow
             self.flows_time.resize(all_points, axis=0)
             self.flows_time[-data_points:] = time - self.time_offset
+
+    def map_time_to_flow(self) -> None:
+        """Maps timestamps to flow indices.
+        """
+        events_group = self.events_file["events"]
+        events_time = events_group["time"]
+        events_time_offset = self.events_file["time_offset"]
+        print("# === Mapping Timestamps to Flow Indices === #")
+        start_value = np.floor(events_time[0]/1e3)
+        end_value = np.ceil(events_time[-1]/1e3)
+        sorted_data = (self.flows_time[:] + self.time_offset)/1e3
+        data_file = self.flow_file
+        data_name = "time_to_flow"
+        offset_value = events_time_offset[0]
+
+        # TODO: Review arguments
+        self.map_data_in_memory(
+            start_value, end_value, sorted_data,
+            data_file, data_name, offset_value
+        )
+
+    # TODO: Check value difference
+    def map_flow_to_events(self) -> None:
+        """Maps flow indices to events indices.
+        """
+        events_group = self.events_file["events"]
+        events_time = events_group["time"]
+        events_time_offset = self.events_file["time_offset"]
+        print("# === Mapping Flow Indices to Events Indices === #")
+        start_value = None
+        end_value = None
+        sorted_data = events_time
+        data_file = self.flow_file
+        data_name = "flow_to_events"
+        offset_value = self.time_offset
+        side = "left"
+        chunks = 32
+        addition = events_time_offset[0]
+        division = 1.0
+        array_value = self.flows_time[:]
+
+        # TODO: Review arguments
+        self.map_data_out_memory(
+            start_value, end_value, sorted_data,
+            data_file, data_name, offset_value, side, chunks,
+            addition, division, array_value
+        )
