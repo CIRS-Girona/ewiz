@@ -24,6 +24,7 @@ def ros_message_to_cv_image(message: Any) -> np.ndarray:
     return image
 
 
+# TODO: Check for missing pixels
 class ConvertBag(ConvertBase):
     """DAVIS bag to eWiz data converter.
     """
