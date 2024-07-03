@@ -131,3 +131,6 @@ class ConvertMVSEC(ConvertBase):
             flow = self.gt_flows[i]
             time = self.gt_time[i]*1e6 - self.min_time
             self.flow_writer.write(flow, time)
+        # Map time to flow
+        self.flow_writer.map_time_to_flow()
+        self.flow_writer.map_flow_to_events()

@@ -27,7 +27,7 @@ class FlowSync():
     ) -> None:
         self.flow_file = flow_file
         self.flows = self.flow_file["flows"]
-        self.flows_time = self.flow_file["flows_time"]
+        self.flows_time = self.flow_file["time"]
         self.time_offset = self.flow_file["time_offset"][0]
         self.time_to_flow = self.flow_file["time_to_flow"]
         self.flow_to_events = self.flow_file["flow_to_events"]
