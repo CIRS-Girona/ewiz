@@ -31,15 +31,22 @@ class LoaderBase():
         raise NotImplementedError
 
     # TODO: Remove manual check
-    def _init_reader(self) -> None:
+    def _init_reader(self, clip_mode: str) -> None:
         """Initializes data reader.
         """
-        raise NotImplementedError
+        if self.reader_mode == "base":
+            self.reader = ReaderBase(self.data_dir, clip_mode)
+        elif self.reader_mode == "flow":
+            self.reader = ReaderFlow(self.data_dir, clip_mode)
+        else:
+            raise KeyError(
+                f"Reader mode key '{self.reader_mode}' is not supported."
+            )
 
     def _init_size(self) -> None:
         """Initializes data size.
         """
-        raise NotImplementedError
+        self.data_size = len(self.reader)
 
     def _init_indices(self) -> None:
         """Initializes data indices.

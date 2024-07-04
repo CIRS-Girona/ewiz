@@ -20,6 +20,7 @@ class ReaderBase():
         self._init_events()
         self._init_gray()
         self._init_clip()
+        self._init_size()
 
     # TODO: Modify based on clipping mode
     def __getitem__(self, indices: Union[int, slice]) -> Tuple[np.ndarray]:
@@ -35,6 +36,11 @@ class ReaderBase():
             return data
         else:
             raise TypeError("Invalid slice.")
+
+    def __len__(self) -> int:
+        """Gets length of dataset.
+        """
+        return self.data_size
 
     def _get_slice_indices(self, indices: slice) -> Tuple[int, int]:
         """Returns slice indices depending on clip mode.
@@ -97,6 +103,20 @@ class ReaderBase():
 
             # Grayscale flag
             self.gray_flag = True
+
+    def _init_size(self) -> None:
+        """Initializes dataset size.
+        """
+        if self.clip_mode == "events":
+            self.data_size = self.events_x.shape[0]
+        elif self.clip_mode == "images":
+            self.data_size = self.gray_images.shape[0]
+        elif self.clip_mode == "time":
+            self.data_size = self.time_to_events.shape[0]
+        else:
+            raise KeyError(
+                f"Clip mode key '{self.clip_mode}' is not supported."
+            )
 
     def _get_events_data(self, start_index: int, end_index: int = None) -> np.ndarray:
         """Combines events data.
