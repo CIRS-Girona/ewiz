@@ -20,3 +20,11 @@ class LoaderEvents(LoaderBase):
         self._init_reader(clip_mode="events")
         self._init_size()
         print(self.data_size)
+
+    def _init_indices(self) -> None:
+        """Initializes data indices.
+        """
+        self.index = 0
+        self.indices = np.arange(self.data_range[0], self.data_range[1], self.data_stride)
+        if self.indices[-1] != self.data_range[1] - 1:
+            self.indices = np.append(self.indices, self.data_range[1] - 1)
