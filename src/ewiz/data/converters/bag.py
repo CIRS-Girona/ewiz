@@ -40,6 +40,8 @@ class ConvertBag(ConvertBase):
         self.sensor_size = sensor_size
         self.events_topic = events_topic
         self.gray_topic = gray_topic
+        self._init_events()
+        self._init_images()
         self._init_writers()
         self._get_min_time()
 

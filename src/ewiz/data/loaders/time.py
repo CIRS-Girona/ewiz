@@ -6,8 +6,8 @@ from ..readers import ReaderBase, ReaderFlow
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-class LoaderEvents(LoaderBase):
-    """Events data loader.
+class LoaderTime(LoaderBase):
+    """Time data loader.
     """
     def __init__(
         self,
@@ -17,7 +17,7 @@ class LoaderEvents(LoaderBase):
         reader_mode: str = "base"
     ) -> None:
         super().__init__(data_dir, data_stride, data_range, reader_mode)
-        self._init_reader(clip_mode="events")
+        self._init_reader(clip_mode="time")
         self._init_size()
         self._init_opts()
         self._init_indices()
@@ -26,7 +26,7 @@ class LoaderEvents(LoaderBase):
         """Initializes data options.
         """
         if self.data_stride is None:
-            self.data_stride = 1e5
+            self.data_stride = 42
         if self.data_range is None:
             self.data_range = (0, self.data_size)
 

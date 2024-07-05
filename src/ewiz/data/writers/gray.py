@@ -79,7 +79,7 @@ class WriterGray(WriterBase):
         sorted_data = (self.gray_time[:] + self.time_offset)/1e3
         data_file = self.gray_file
         data_name = "time_to_gray"
-        offset_value = events_time_offset[0]
+        offset_value = events_time_offset[0]/1e3
 
         # TODO: Review arguments
         self.map_data_in_memory(
@@ -102,7 +102,7 @@ class WriterGray(WriterBase):
         data_name = "gray_to_events"
         offset_value = self.time_offset
         side = "left"
-        chunks = 32
+        chunks = 500
         addition = events_time_offset[0]
         division = 1.0
         array_value = self.gray_time[:]

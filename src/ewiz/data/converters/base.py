@@ -18,8 +18,6 @@ class ConvertBase():
     ) -> None:
         self.data_dir = data_dir
         self.out_dir = out_dir
-        self._init_events()
-        self._init_images()
 
     def _init_events(self) -> None:
         """Initializes events file path.

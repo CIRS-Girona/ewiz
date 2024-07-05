@@ -48,4 +48,4 @@ class WindowManager():
             if w == self.grid_size[1]:
                 w = 0
                 h += 1
-            cv2.waitKey(0)
+            cv2.waitKey(self.refresh_rate)

@@ -2,6 +2,7 @@ import os
 import h5py
 import hdf5plugin
 import natsort
+import cv2
 import numpy as np
 
 from tqdm import tqdm
@@ -24,6 +25,8 @@ class ConvertDSEC(ConvertBase):
         super().__init__(data_dir, out_dir)
         self.cam_location = cam_location
         self.sensor_size = (480, 640)
+        self._init_events()
+        self._init_images()
         self._get_events_time_offset()
         self._init_writers()
 
@@ -43,6 +46,8 @@ class ConvertDSEC(ConvertBase):
         self.rgb_dir = os.path.join(self.data_dir, "images", self.cam_location, "rectified")
         self.rgb_size = len(os.listdir(self.rgb_dir))
         self.rgb_sorted = natsort.natsorted(os.listdir(self.rgb_dir))
+        self.rgb_time_path = os.path.join(self.data_dir, "images", "timestamps.txt")
+        self.rgb_time = np.loadtxt(self.rgb_time_path, dtype=np.int64)
 
     def _init_writers(self) -> None:
         """Initializes writers.
@@ -79,12 +84,24 @@ class ConvertDSEC(ConvertBase):
             end = int(self.events_indices[i + 1])
             chunk_size = (end - start, 4)
             events = np.zeros(chunk_size, dtype=np.float64)
-            events[:, 0] = self.events_x[start:end + 1]
-            events[:, 1] = self.events_y[start:end + 1]
-            events[:, 2] = self.events_time[start:end + 1] + self.events_time_offset
-            events[:, 3] = self.events_pol[start:end + 1]
+            events[:, 0] = self.events_x[start:end]
+            events[:, 1] = self.events_y[start:end]
+            events[:, 2] = self.events_time[start:end] + self.events_time_offset
+            events[:, 3] = self.events_pol[start:end]
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
         # Map time to events
         # TODO: Add option to choose chunk number
         self.events_writer.map_time_to_events()
+
+        print("# === Converting RGB Images === #")
+        progress_bar = tqdm(range(self.rgb_size))
+        for i in progress_bar:
+            image_path = os.path.join(self.rgb_dir, self.rgb_sorted[i])
+            image = cv2.imread(image_path, 0)
+            image = cv2.resize(image, self.sensor_size)
+            time = self.rgb_time[i]
+            self.gray_writer.write(gray_image=image, time=time)
+        # Map time to grayscale images
+        self.gray_writer.map_time_to_gray()
+        self.gray_writer.map_gray_to_events()

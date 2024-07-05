@@ -68,6 +68,7 @@ class WriterFlow(WriterBase):
             self.flows_time.resize(all_points, axis=0)
             self.flows_time[-data_points:] = time - self.time_offset
 
+    # TODO: Check time offset here
     def map_time_to_flow(self) -> None:
         """Maps timestamps to flow indices.
         """

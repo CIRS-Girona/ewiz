@@ -19,6 +19,8 @@ class LoaderBase():
         self.data_stride = data_stride
         self.data_range = data_range
         self.reader_mode = reader_mode
+        self.index = 0
+        self.indices: np.ndarray = None
 
     def __iter__(self) -> Callable:
         """Returns iterator.
@@ -28,7 +30,18 @@ class LoaderBase():
     def __next__(self) -> Tuple[np.ndarray]:
         """Iterates over data.
         """
-        raise NotImplementedError
+        if self.index < self.data_size:
+            start = int(self.indices[self.index])
+            end = int(self.indices[self.index + 1])
+            data = self.reader[start:end]
+
+            # If events array is too small, we stop the iterator
+            if len(data[0]) < 1:
+                raise StopIteration
+
+            self.index += 1
+            return data
+        raise StopIteration
 
     # TODO: Remove manual check
     def _init_reader(self, clip_mode: str) -> None:

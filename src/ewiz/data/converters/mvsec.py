@@ -20,6 +20,8 @@ class ConvertMVSEC(ConvertBase):
         out_dir: str
     ) -> None:
         super().__init__(data_dir, out_dir)
+        self._init_events()
+        self._init_images()
         self._init_gt()
         self._init_writers()
         self._get_min_time()
