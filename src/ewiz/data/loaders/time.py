@@ -29,6 +29,8 @@ class LoaderTime(LoaderBase):
             self.data_stride = 42
         if self.data_range is None:
             self.data_range = (0, self.data_size)
+        elif self.data_range[1] < 0:
+            self.data_range = (self.data_range[0], self.data_size - self.data_range[1])
 
     def _init_indices(self) -> None:
         """Initializes data indices.
