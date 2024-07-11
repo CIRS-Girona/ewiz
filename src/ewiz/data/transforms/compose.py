@@ -3,6 +3,7 @@ import numpy as np
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
+# TODO: Add structure transforms
 class Compose():
     """General compose class.
     """
@@ -33,3 +34,14 @@ class Compose():
         if self.use_tonic and events_flag:
             data = self.to_unstructured(data)
         return data
+
+    def __repr__(self) -> str:
+        """Prints transforms.
+        """
+        trans_str = self.__class__.__name__ + "("
+        for transform in self.transforms:
+            trans_str += "\n"
+            trans_str += "    {0},".format(transform)
+        trans_str += "\n"
+        trans_str += ")"
+        return trans_str
