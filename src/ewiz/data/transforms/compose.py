@@ -1,5 +1,7 @@
 import numpy as np
 
+from .structure import EventsToStructured, EventsToUnstructured
+
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
@@ -15,8 +17,8 @@ class Compose():
         self.transforms = transforms
         self.use_tonic = use_tonic
         # Structure transforms
-        self.to_structured = None
-        self.to_unstructured = None
+        self.to_structured = EventsToStructured()
+        self.to_unstructured = EventsToUnstructured()
 
     def __call__(self, data: np.ndarray) -> np.ndarray:
         """Call function.
