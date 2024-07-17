@@ -23,4 +23,19 @@ class NormalizedGradientMagnitude(LossBase):
     ) -> None:
         super().__init__(direction, store_history)
         self.grad_mag = GradientMagnitude(direction, store_history, precision, device)
-        # TODO: Continue code here
+
+    @LossBase.add_history
+    @LossBase.catch_key_error
+    def calculate(
+        self,
+        ie: torch.Tensor,
+        iwe: torch.Tensor,
+        omit_bounds: bool
+    ) -> torch.Tensor:
+        """Calculates loss function.
+        """
+        loss_iwe = self.grad_mag.calculate(iwe=iwe, omit_bounds=omit_bounds)
+        loss_ie = self.grad_mag.calculate(iwe=ie, omit_bounds=omit_bounds)
+        if self.direction == "minimize":
+            return loss_ie/loss_iwe
+        return loss_iwe/loss_ie
