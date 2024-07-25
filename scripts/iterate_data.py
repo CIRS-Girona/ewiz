@@ -9,8 +9,8 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerFlow
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/Documents/datasets/converted/mvsec/indoor_flying1.bak2"
-    data_loader = LoaderTime(
+    data_dir = "/home/jad/Documents/datasets/carla/ecarla-scenes/carla_data"
+    data_loader = LoaderEvents(
         data_dir=data_dir,
         reader_mode="flow"
     )
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         image_size=(260, 346),
         grid_size=(2, 2),
         window_names=["Events", "Flow"],
-        refresh_rate=2
+        refresh_rate=10
     )
     events_visualizer = VisualizerEvents(image_size=(260, 346))
     flow_visualizer = VisualizerFlow(image_size=(260, 346))

@@ -81,7 +81,7 @@ class WriterFlow(WriterBase):
         sorted_data = (self.flows_time[:] + self.time_offset)/1e3
         data_file = self.flow_file
         data_name = "time_to_flow"
-        offset_value = events_time_offset[0]
+        offset_value = events_time_offset[0]/1e3
 
         # TODO: Review arguments
         self.map_data_in_memory(
