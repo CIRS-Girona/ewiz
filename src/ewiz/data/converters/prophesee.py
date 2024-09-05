@@ -71,3 +71,5 @@ class ConvertProphesee(ConvertBase):
             events[:, 3] = self.events_pol[start:end]
             events = events.astype(np.int64)
             self.events_writer.write(events=events)
+        # Map time to events
+        self.events_writer.map_time_to_events()

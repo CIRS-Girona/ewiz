@@ -195,13 +195,17 @@ class ReaderBase():
             end_index = int(self.time_to_events[end_time])
             events = self._get_events_data(start_index, end_index)
             # TODO: Organize indexing
-            start_index = (
-                int(self.time_to_gray[start_time] - 1)
-                if self.time_to_gray[start_time] > 0
-                else int(self.time_to_gray[start_time])
-            )
-            end_index = int(self.time_to_gray[end_time] + 1)
-            gray_images, gray_time = self._get_gray_images(start_index, end_index)
+            gray_images = None
+            gray_time = None
+            # TODO: Add condition for other indexing methods
+            if self.gray_flag:
+                start_index = (
+                    int(self.time_to_gray[start_time] - 1)
+                    if self.time_to_gray[start_time] > 0
+                    else int(self.time_to_gray[start_time])
+                )
+                end_index = int(self.time_to_gray[end_time] + 1)
+                gray_images, gray_time = self._get_gray_images(start_index, end_index)
             return events, gray_images, gray_time
         else:
             start_index = int(self.time_to_events[start_time])
