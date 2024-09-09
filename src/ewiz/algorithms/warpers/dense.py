@@ -42,5 +42,11 @@ class WarperDense(WarperBase):
         # Warp events
         warped_events = events.clone()
         flat_flow = flow.reshape((flow.shape[0], 2, -1))
+        # TODO: Check conversion to long
         flat_events = events[..., 1].long()*self.image_size[0] + events[..., 0].long()
-        # TODO: Continue code
+        warped_events[..., 0] = events[..., 0] - delta_times*torch.gather(flat_flow[:, 0], 1, flat_events)
+        warped_events[..., 1] = events[..., 1] - delta_times*torch.gather(flat_flow[:, 1], 1, flat_events)
+        warped_events[..., 2] = delta_times
+        # TODO: Check need for squeeze
+        warped_events = warped_events.squeeze()
+        return warped_events
