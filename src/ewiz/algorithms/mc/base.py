@@ -23,7 +23,11 @@ class MotionCompensationBase():
         self.optimizer = optimizer
         self.flow_inits = flow_inits
 
+        # Patch variables
         self.num_patches = None
+
+        # Previously optimized flow
+        self.optimized_patch_flows = None
 
     def _init_flow(self) -> np.ndarray:
         """Initializes flow.
