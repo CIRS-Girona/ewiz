@@ -3,6 +3,8 @@ import h5py
 import hdf5plugin
 import numpy as np
 
+from ewiz.core.utils import read_json
+
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
@@ -17,6 +19,7 @@ class ReaderBase():
     ) -> None:
         self.data_dir = data_dir
         self.clip_mode = clip_mode
+        self._init_props()
         self._init_events()
         self._init_gray()
         self._init_clip()
@@ -62,6 +65,16 @@ class ReaderBase():
             "Check your integer index."
         )
         return index
+
+    # TODO: Modify format
+    def _init_props(self) -> None:
+        """Initializes properties.
+        """
+        props_path = os.path.join(self.data_dir, "props.json")
+        props = read_json(props_path)
+
+        # Dataset properties
+        self.sensor_size = tuple(props["sensor_size"])
 
     def _init_events(self) -> None:
         """Initializes events file.
