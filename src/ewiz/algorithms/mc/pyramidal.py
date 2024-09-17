@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 class MotionCompensationPyramidal(MotionCompensationBase):
     """Pyramidal motion compensation class.
     """
+    name = "pyramidal"
+
     def __init__(
         self,
         image_size: Tuple[int, int],

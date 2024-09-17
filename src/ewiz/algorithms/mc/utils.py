@@ -30,3 +30,13 @@ def update_fine_to_coarse_flow(patch_flows: Dict[int, torch.Tensor]) -> Dict[int
     for i in range(fine, coarse - 1, -1):
         final_flows[i - 1] = skimage.transform.pyramid_reduce(patch_flows[i], channel_axis=0)
     return final_flows
+
+def parse_mc_args(
+    self,
+    events: torch.Tensor,
+    dense_flow: torch.Tensor,
+    patch_flow: torch.Tensor = None
+) -> Dict[str, torch.Tensor]:
+    """Parses motion compensation arguments.
+    """
+    raise NotImplementedError

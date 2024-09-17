@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 class ImagerCount(ImagerBase):
     """Count imager class.
     """
+    name = "count"
+
     def __init__(
         self,
         image_size: Tuple[int, int],

@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 class WarperDense(WarperBase):
     """Dense events warper.
     """
+    name = "dense"
+
     def __init__(
         self,
         image_size: Tuple[int, int]

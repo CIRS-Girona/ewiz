@@ -15,6 +15,7 @@ class ImagerBase():
         image_padding: Tuple[int, int] = (0, 0)
     ) -> None:
         self._update_image_props(image_size, image_padding)
+        self.iwe_func: Callable = None
 
     def _update_image_props(
         self,

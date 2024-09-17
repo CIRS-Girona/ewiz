@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 class LossHybrid(LossBase):
     """Hybrid loss function.
     """
+    name = "hybrid"
+
     def __init__(
         self,
         losses: List[str],
@@ -22,7 +24,6 @@ class LossHybrid(LossBase):
         *args,
         **kwargs
     ) -> None:
-        super().__init__(direction, store_history, *args, **kwargs)
         self.losses = losses
         self.weights = weights
         self.batch_size = batch_size
@@ -39,6 +40,7 @@ class LossHybrid(LossBase):
             ),
             "weight": self.weights[i]
         } for i, name in enumerate(self.losses)}
+        super().__init__(direction, store_history, *args, **kwargs)
 
         # Setup required keys
         self.required_keys = []

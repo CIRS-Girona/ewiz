@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 class ImagerBilinear(ImagerBase):
     """Bilinear imager class.
     """
+    name = "bilinear"
+
     def __init__(
         self,
         image_size: Tuple[int, int],

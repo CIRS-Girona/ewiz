@@ -14,6 +14,7 @@ class Sobel(nn.Module):
         precision: str = "64",
         device: str = "cuda"
     ) -> None:
+        super().__init__()
         self.in_channels = in_channels
         self.kernel_size = kernel_size
         self.precision = precision
