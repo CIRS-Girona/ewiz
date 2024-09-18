@@ -30,7 +30,8 @@ class LoaderBase():
     def __next__(self) -> Tuple[np.ndarray]:
         """Iterates over data.
         """
-        if self.index < self.data_size:
+        # TODO: Check for correct fix
+        if self.index < len(self.indices) - 1:
             start = int(self.indices[self.index])
             end = int(self.indices[self.index + 1])
             data = self.reader[start:end]

@@ -71,10 +71,10 @@ class ReaderBase():
         """Initializes properties.
         """
         props_path = os.path.join(self.data_dir, "props.json")
-        props = read_json(props_path)
+        self.props = read_json(props_path)
 
         # Dataset properties
-        self.sensor_size = tuple(props["sensor_size"])
+        self.sensor_size = tuple(self.props["sensor_size"])
 
     def _init_events(self) -> None:
         """Initializes events file.

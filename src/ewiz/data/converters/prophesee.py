@@ -23,9 +23,10 @@ class ConvertProphesee(ConvertBase):
     def __init__(
         self,
         data_dir: str,
-        out_dir: str
+        out_dir: str,
+        sensor_size: Tuple[int, int] = (720, 1280)
     ) -> None:
-        super().__init__(data_dir, out_dir)
+        super().__init__(data_dir, out_dir, sensor_size)
         self._init_events()
         self._init_writers()
 

@@ -24,6 +24,7 @@ class VisualizerEvents(VisualizerBase):
             image_size, save_images, override_images, image_prefix, out_dir
         )
         self.render_func = self._generate_events_image
+        self.mask_func = self._generate_events_mask
 
     def _generate_events_image(self, events: np.ndarray) -> np.ndarray:
         """Generates events image.
@@ -44,3 +45,14 @@ class VisualizerEvents(VisualizerBase):
         # Generate image
         events_image[h_coords, w_coords, :] = colors
         return events_image
+
+    def _generate_events_mask(self, events: np.ndarray) -> np.ndarray:
+        """Generates events mask.
+        """
+        events_mask = np.zeros((self.image_size[0], self.image_size[1]), dtype=np.uint8)
+        w_coords = events[:, 0].astype(np.int32)
+        h_coords = events[:, 1].astype(np.int32)
+
+        # Generate mask
+        events_mask[h_coords, w_coords] = 1
+        return events_mask
