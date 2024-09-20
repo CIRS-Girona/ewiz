@@ -35,14 +35,15 @@ if __name__ == "__main__":
             "multifocal_normalized_image_variance",
             "smoothness"
         ],
-        weights=[1.0, 1.0, 0.1],
+        weights=[1.0, 1.0, 0.01],
         warper_type="dense",
         imager_type="bilinear",
         batch_size=1,
         direction="minimize",
         store_history=False,
         precision="64",
-        device="cuda"
+        device="cuda",
+        render_visuals=True
     )
 
     # Initialize optimizer

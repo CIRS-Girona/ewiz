@@ -17,6 +17,7 @@ class WarperDense(WarperBase):
     ) -> None:
         super().__init__(image_size)
 
+    # TODO: Add time scale option
     def warp(
         self,
         events: torch.Tensor,
@@ -28,7 +29,7 @@ class WarperDense(WarperBase):
         """Main warping function.
         """
         ref_time = self._get_ref_time(events, direction)
-        delta_times = events[..., 2] - ref_time
+        delta_times = events[..., 2]/10e6 - ref_time
         # Check dimensions
         if len(events.shape) == 2:
             events = events[None, ...]

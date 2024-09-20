@@ -8,9 +8,13 @@ from ewiz.losses import LossBase, LossHybrid
 from ewiz.algorithms.warpers import WarperBase
 from ewiz.algorithms.imagers import ImagerBase
 
+from ewiz.renderers import WindowManager
+from ewiz.renderers.visualizers import VisualizerEvents
+
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
+# TODO: Add save visuals option
 class LossMotionCompensation(LossBase):
     """Motion compensation loss.
     """
@@ -26,6 +30,8 @@ class LossMotionCompensation(LossBase):
         store_history: bool = False,
         precision: str = "64",
         device: str = "cuda",
+        render_visuals: bool = False,
+        save_visuals: bool = False,
         *args,
         **kwargs
     ) -> None:
@@ -45,6 +51,13 @@ class LossMotionCompensation(LossBase):
         self.device = device
         self._init_functions()
 
+        # Visuals properties
+        self.render_visuals = render_visuals
+        self.save_visuals = save_visuals
+        self.get_visuals = self.render_visuals or self.save_visuals
+        if self.get_visuals:
+            self._init_renderers()
+
     def _init_functions(self) -> None:
         """Initializes functions.
         """
@@ -56,7 +69,20 @@ class LossMotionCompensation(LossBase):
         # TODO: Look into image padding argument
         self.imager_func: ImagerBase = imager_functions[self.imager_type](self.image_size)
 
-    # TODO: Add render option
+    # TODO: Fix hard-coded values and format
+    def _init_renderers(self) -> None:
+        """Initializes renderers.
+        """
+        self.window_manager = WindowManager(
+            image_size=self.image_size,
+            grid_size=(2, 2),
+            window_names=["IWE"]
+        )
+        self.events_visualizer = VisualizerEvents(
+            image_size=self.image_size
+        )
+
+    # TODO: Add render option, fix format
     def _parse_mc_args(
         self,
         events: torch.Tensor,
@@ -69,41 +95,56 @@ class LossMotionCompensation(LossBase):
         # TODO: Set to default
         required_keys = self.loss_func.required_keys
         mc_args = {"omit_bounds": True}
+        visuals = {}
 
         if "ie" in required_keys:
             ie = self.imager_func.generate_iwe(events)
             mc_args.update({"ie": ie})
+            if self.get_visuals:
+                visuals.update({"ie": events.clone().to("cpu").detach().numpy()})
         if "iwe" in required_keys:
             warped_events = self.warper_func.warp(
                 events=events, flow=dense_flow, direction="start"
             )
             iwe = self.imager_func.generate_iwe(warped_events)
             mc_args.update({"iwe": iwe})
+            if self.get_visuals:
+                visuals.update({"iwe": warped_events.clone().to("cpu").detach().numpy()})
         if "start_iwe" in required_keys:
             start_events = self.warper_func.warp(
                 events=events, flow=dense_flow, direction="start"
             )
             start_iwe = self.imager_func.generate_iwe(start_events)
             mc_args.update({"start_iwe": start_iwe})
+            if self.get_visuals:
+                visuals.update({"start_iwe": start_events.clone().to("cpu").detach().numpy()})
+                # TODO: Change rendering logic
+                visuals["start_iwe"][:, :2] = np.clip(visuals["start_iwe"][:, :2], 0, 255)
+                start_image = self.events_visualizer.render_image(visuals["start_iwe"])
+                self.window_manager.render(start_image)
         if "mid_iwe" in required_keys:
             mid_events = self.warper_func.warp(
                 events=events, flow=dense_flow, direction="mid"
             )
             mid_iwe = self.imager_func.generate_iwe(mid_events)
             mc_args.update({"mid_iwe": mid_iwe})
+            if self.get_visuals:
+                visuals.update({"mid_iwe": mid_events.clone().to("cpu").detach().numpy()})
         if "end_iwe" in required_keys:
             end_events = self.warper_func.warp(
                 events=events, flow=dense_flow, direction="end"
             )
             end_iwe = self.imager_func.generate_iwe(end_events)
             mc_args.update({"end_iwe": end_iwe})
+            if self.get_visuals:
+                visuals.update({"end_iwe": end_events.clone().to("cpu").detach().numpy()})
         # TODO: Change logic type
         if "flow" in required_keys:
             if patch_flow is None:
                 mc_args.update({"flow": dense_flow})
             else:
                 mc_args.update({"flow": patch_flow})
-        return mc_args, None
+        return mc_args, visuals
 
     @LossBase.add_history
     @LossBase.catch_key_error

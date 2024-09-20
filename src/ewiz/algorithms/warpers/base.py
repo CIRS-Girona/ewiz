@@ -13,6 +13,7 @@ class WarperBase():
     ) -> None:
         self.image_size = image_size
 
+    # TODO: Add time scale option
     def _get_ref_time(
         self, events: torch.Tensor, direction: Union[str, float] = "start"
     ) -> torch.Tensor:
@@ -22,13 +23,13 @@ class WarperBase():
             max_time = torch.max(events[..., 2], dim=-1).values
             min_time = torch.min(events[..., 2], dim=-1).values
             delta_time = max_time - min_time
-            warp_time = min_time + delta_time*direction
+            warp_time = (min_time + delta_time*direction)/10e6
             return warp_time
         # Convert string input to float
         elif direction == "start":
-            return torch.min(events[..., 2], dim=-1).values
+            return torch.min(events[..., 2], dim=-1).values/10e6
         elif direction == "end":
-            return torch.max(events[..., 2], dim=-1).values
+            return torch.max(events[..., 2], dim=-1).values/10e6
         elif direction == "mid":
             return self._get_ref_time(events, 0.5)
         elif direction == "random":
@@ -44,7 +45,7 @@ class WarperBase():
         )
         raise ValueError(error)
 
-    def warp(self, events: torch.Tensor, *args, **kwargs) -> None:
+    def warp(self, events: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """Main warping function.
         """
         raise NotImplementedError
