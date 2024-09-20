@@ -57,5 +57,5 @@ class ImagerCount(ImagerBase):
         pos_ids = (pos_ids*mask_ids).long()
         pixel_vals = pixel_vals*mask_ids
         iwe.scatter_add_(1, pos_ids, pixel_vals)
-        iwe = iwe.reshape((batch_size,), self.image_size).squeeze()
+        iwe = iwe.reshape((batch_size,) + self.image_size).squeeze()
         return iwe

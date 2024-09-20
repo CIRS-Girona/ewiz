@@ -28,7 +28,7 @@ class LossSmoothness(LossBase):
 
     @LossBase.add_history
     @LossBase.catch_key_error
-    def calculate(self, flow: torch.Tensor, omit_bounds: bool) -> torch.Tensor:
+    def calculate(self, flow: torch.Tensor, omit_bounds: bool, *args, **kwargs) -> torch.Tensor:
         """Calculates loss function.
         """
         if len(flow.shape) == 3:

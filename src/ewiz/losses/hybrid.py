@@ -96,5 +96,7 @@ class LossHybrid(LossBase):
         comb_loss = torch.zeros(self.batch_size).cuda()
         for name in self.loss_functions.keys():
             loss = self.loss_functions[name]["weight"]*self.loss_functions[name]["function"].calculate(*args, **kwargs)
+            # TODO: Remove loss print
+            print("One Loss:", loss)
             comb_loss += loss
         return comb_loss

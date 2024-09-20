@@ -26,7 +26,7 @@ class GradientMagnitude(LossBase):
 
     @LossBase.add_history
     @LossBase.catch_key_error
-    def calculate(self, iwe: torch.Tensor, omit_bounds: bool) -> torch.Tensor:
+    def calculate(self, iwe: torch.Tensor, omit_bounds: bool, *args, **kwargs) -> torch.Tensor:
         """Calculates loss function.
         """
         if len(iwe.shape) == 2:

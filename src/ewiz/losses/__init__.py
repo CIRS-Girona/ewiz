@@ -13,12 +13,14 @@ from .gradient.gradient import GradientMagnitude
 from .gradient.normalized import NormalizedGradientMagnitude
 from .gradient.multifocal import MultifocalNormalizedGradientMagnitude
 
+# Other loss imports
+from .smooth import LossSmoothness
+
 
 # Import all losses
 loss_functions = get_inheritors(parent=LossBase)
 
 # TODO: Check photometric loss format
 from .photometric import Photometric
-from .smooth import LossSmoothness
 from .hybrid import LossHybrid
 from .mc import LossMotionCompensation

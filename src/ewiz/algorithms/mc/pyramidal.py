@@ -37,11 +37,12 @@ class MotionCompensationPyramidal(MotionCompensationBase):
         self.patches = {}
         self.nums_patches = {}
         self.total_num_patches = 0
+        self._create_pyramidal_patches()
 
     def _create_pyramidal_patches(self) -> None:
         """Creates pyramidal patches.
         """
-        for i in range(self.scales[0], self.scales[5]):
+        for i in range(self.scales[0], self.scales[1]):
             size = (self.image_size[0]//(2**i), self.image_size[1]//(2**i))
             self.patches_size[i] = size
             self.patches_stride[i] = size
@@ -114,10 +115,11 @@ class MotionCompensationPyramidal(MotionCompensationBase):
             "Check your code logic."
         )
         final_flows = patch_flows.copy()
-        patch_flows.update({self.curr_scale: patch_flow})
+        final_flows.update({self.curr_scale: patch_flow})
         # TODO: Check if properties change, negative sign
-        dense_flow = convert_patch_to_dense_flow(patch_flow, self.grid_size, self.image_size)
-        patch_flow = -patch_flows[self.curr_scale].reshape((1, 2) + self.grid_size)[0]
+        curr_flow = final_flows[self.curr_scale]
+        dense_flow = convert_patch_to_dense_flow(curr_flow, self.grid_size, self.image_size)
+        patch_flow = -final_flows[self.curr_scale].reshape((1, 2) + self.grid_size)[0]
         loss = self.loss.calculate(events=events, patch_flow=patch_flow, dense_flow=dense_flow)
         return loss
 

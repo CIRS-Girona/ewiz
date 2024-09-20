@@ -32,7 +32,9 @@ class MultifocalNormalizedGradientMagnitude(LossBase):
         start_iwe: torch.Tensor,
         mid_iwe: torch.Tensor,
         end_iwe: torch.Tensor,
-        omit_bounds: bool
+        omit_bounds: bool,
+        *args,
+        **kwargs
     ) -> torch.Tensor:
         """Calculates loss function.
         """

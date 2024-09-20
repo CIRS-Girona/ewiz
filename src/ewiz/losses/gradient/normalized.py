@@ -30,7 +30,9 @@ class NormalizedGradientMagnitude(LossBase):
         self,
         ie: torch.Tensor,
         iwe: torch.Tensor,
-        omit_bounds: bool
+        omit_bounds: bool,
+        *args,
+        **kwargs
     ) -> torch.Tensor:
         """Calculates loss function.
         """

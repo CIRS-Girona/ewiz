@@ -118,7 +118,9 @@ class Photometric(LossBase):
         self,
         flows: List[torch.Tensor],
         gray_images: torch.Tensor,
-        weights: Union[float, torch.Tensor] = 1.0
+        weights: Union[float, torch.Tensor] = 1.0,
+        *args,
+        **kwargs
     ) -> torch.Tensor:
         """Calculates loss function.
         """

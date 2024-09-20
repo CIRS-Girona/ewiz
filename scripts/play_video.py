@@ -6,6 +6,6 @@ from ewiz.renderers.videos import VideoRendererBase
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/Documents/datasets/prophesee/ewiz/test1"
+    data_dir = "/home/jad/datasets/prophesee/ewiz/test1"
     video_renderer = VideoRendererBase(data_dir, 10)
     video_renderer.play()
