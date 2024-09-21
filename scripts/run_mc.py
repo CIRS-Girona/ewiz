@@ -17,7 +17,7 @@ from ewiz.algorithms.mc import MotionCompensationPyramidal
 if __name__ == "__main__":
     # Initialize data reader
     data_reader = ReaderBase(
-        data_dir="/home/jad/datasets/mvsec/ewiz/indoor_flying1",
+        data_dir="/home/jad/Documents/datasets/mvsec/ewiz/indoor_flying1",
         clip_mode="time"
     )
     events, _, _ = data_reader[20000:20500]
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "multifocal_normalized_image_variance",
             "smoothness"
         ],
-        weights=[1.0, 1.0, 0.01],
+        weights=[1.0, 1.0, 0.0001],
         warper_type="dense",
         imager_type="bilinear",
         batch_size=1,

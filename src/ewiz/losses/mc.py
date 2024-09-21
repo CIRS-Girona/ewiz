@@ -76,7 +76,8 @@ class LossMotionCompensation(LossBase):
         self.window_manager = WindowManager(
             image_size=self.image_size,
             grid_size=(2, 2),
-            window_names=["IWE"]
+            window_names=["IWE"],
+            window_size=(720, 1080)
         )
         self.events_visualizer = VisualizerEvents(
             image_size=self.image_size
