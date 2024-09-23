@@ -1,3 +1,5 @@
+# TODO: Add weights to the patches with pixels
+# TODO: Separate negative and positive images
 from ewiz.core.utils import get_inheritors
 
 # Base loss import

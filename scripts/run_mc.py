@@ -17,25 +17,25 @@ from ewiz.algorithms.mc import MotionCompensationPyramidal
 if __name__ == "__main__":
     # Initialize data reader
     data_reader = ReaderBase(
-        data_dir="/home/jad/datasets/mvsec/ewiz/indoor_flying1",
+        data_dir="/home/jad/datasets/prophesee/ewiz/test4",
         clip_mode="time"
     )
-    events, _, _ = data_reader[20000:20500]
+    events, _, _ = data_reader[12000:12050]
 
     # Apply transforms
-    ewiz_transforms = [EventsCenterCrop(in_size=(260, 346), out_size=(256, 256))]
+    ewiz_transforms = [EventsCenterCrop(in_size=(720, 1280), out_size=(720, 720))]
     ewiz_compose = Compose(transforms=ewiz_transforms, use_tonic=True)
     events = ewiz_compose(events)
 
     # Initialize loss function
     mc_loss = LossMotionCompensation(
-        image_size=(256, 256),
+        image_size=(720, 720),
         losses=[
             "multifocal_normalized_gradient_magnitude",
             "multifocal_normalized_image_variance",
             "smoothness"
         ],
-        weights=[1.0, 1.0, 0.01],
+        weights=[1.0, 1.0, 0.001],
         warper_type="dense",
         imager_type="bilinear",
         batch_size=1,
@@ -48,10 +48,10 @@ if __name__ == "__main__":
 
     # Initialize optimizer
     mc_pyramidal = MotionCompensationPyramidal(
-        image_size=(256, 256),
+        image_size=(720, 720),
         loss=mc_loss,
         optimizer="BFGS",
-        flow_inits=(-20, 20),
+        flow_inits=(-20000, 20000),
         scales=(1, 5)
     )
 
