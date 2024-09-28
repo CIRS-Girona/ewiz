@@ -8,6 +8,7 @@ from tqdm import tqdm
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
+# TODO: Sensor size study
 class WriterBase():
     """Base data writer for saving event-based data in HDF5 format.
     """
