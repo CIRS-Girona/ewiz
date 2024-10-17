@@ -7,6 +7,7 @@ import cv2
 import roslib
 import rosbag
 
+from cv_bridge import CvBridge
 from tqdm import tqdm
 
 from .base import ConvertBase
@@ -43,11 +44,21 @@ class ConvertStonefish(ConvertBase):
         self.events_topic = events_topic
         self.rgb_topic = rgb_topic
         self.flow_topic = flow_topic
+
+        # OpenCV bridge
+        self.bridge = CvBridge()
+
         self._init_events()
         self._init_images()
         self._init_flow()
         self._init_writers()
         self._get_min_time()
+
+    def ros_flow_to_cv(self, message: Any) -> np.ndarray:
+        """Converts ROS message to OpenCV image.
+        """
+        flow = self.bridge.imgmsg_to_cv2(message, desired_encoding="passthrough")
+        return flow
 
     def _init_events(self) -> None:
         """Initializes events bag file.
@@ -79,9 +90,11 @@ class ConvertStonefish(ConvertBase):
         events_messages = self.bag_file.read_messages(topics=self.events_topic)
         for events_data in events_messages:
             _, message, _ = events_data
-            events = self._extract_events(message)
-            self.min_time = int(events[0, 2])
-            break
+            # TODO: Check why empty arrays
+            if len(message.events) > 1:
+                events = self._extract_events(message)
+                self.min_time = int(events[0, 2])
+                break
         # Get minimum grayscale timestamp
         rgb_messages = self.bag_file.read_messages(topics=self.rgb_topic)
         for rgb_data in rgb_messages:
@@ -135,7 +148,6 @@ class ConvertStonefish(ConvertBase):
         for flow_data in tqdm(flow_messages):
             _, message, _ = flow_data
             flow_image, time = self._extract_flow(message)
-            print(flow_image.shape)
             time -= self.min_time
             if self.previous_time is not None:
                 self.flow_writer.write(flow_image, time)
@@ -188,7 +200,7 @@ class ConvertStonefish(ConvertBase):
         """
         time = getattr(message, "header").stamp
         time = int((time.secs + time.nsecs*1e-9)*1e6)
-        flow_image = ros_message_to_cv_image(message)
+        flow_image = self.ros_flow_to_cv(message)
         flow_image = np.transpose(flow_image, axes=(2, 0, 1))
         if self.previous_time is not None:
             delta_time = time - self.previous_time

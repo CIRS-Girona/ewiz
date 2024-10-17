@@ -18,6 +18,7 @@ and neuromorphic hardware.
     :caption: Table of Contents
 
     started/index
+    features/index
     format/index
     mc/index
 
