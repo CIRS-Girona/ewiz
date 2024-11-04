@@ -4,6 +4,8 @@ import numpy as np
 
 from PIL import Image
 
+from ewiz.core.utils import create_dir
+
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
@@ -16,7 +18,9 @@ class WindowManager():
         grid_size: Tuple[int, int],
         window_names: List[str],
         refresh_rate: int = 2,
-        window_size: Tuple[int, int] = None
+        window_size: Tuple[int, int] = None,
+        save_images: bool = False,
+        save_dir: str = None
     ) -> None:
         self.image_size = image_size
         self.grid_size = grid_size
@@ -24,6 +28,19 @@ class WindowManager():
         self.num_windows = len(window_names)
         self.refresh_rate = refresh_rate
         self.window_size = window_size
+        self.save_images = save_images
+        self.save_dir = save_dir
+        self._init_image_saver()
+
+    def _init_image_saver(self) -> None:
+        """Initializes image saver.
+        """
+        if self.save_images:
+            self.save_dirs = [
+                create_dir(os.path.join(self.save_dir, window_name))
+                for window_name in self.window_names
+            ]
+            self.image_indices = [0 for i in range(self.num_windows)]
 
     def _display_text(
         self,
@@ -72,6 +89,16 @@ class WindowManager():
                 cv2.resizeWindow(self.window_names[i], self.window_size[1], self.window_size[0])
                 image = cv2.resize(image, (self.window_size[1], self.window_size[0]))
             cv2.imshow(self.window_names[i], image)
+
+            # Save image
+            if self.save_images:
+                image_path = os.path.join(
+                    self.save_dirs[i],
+                    "image" + str(self.image_indices[i]) + ".png"
+                )
+                cv2.imwrite(image_path, image)
+                self.image_indices[i] += 1
+
             # Update indices
             w += 1
             if w == self.grid_size[1]:

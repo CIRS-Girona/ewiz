@@ -17,12 +17,16 @@ class VideoRendererBase():
         self,
         data_dir: str,
         data_stride: int = None,
-        data_range: Tuple[int, int] = None
+        data_range: Tuple[int, int] = None,
+        save_images: bool = False,
+        save_dir: str = None
     ) -> None:
         self.data_dir = data_dir
         self.data_stride = data_stride
         self.data_range = data_range
         self.props = import_props(self.data_dir)
+        self.save_images = save_images
+        self.save_dir = save_dir
         self._init_video()
 
     def _init_video(self) -> None:
@@ -38,9 +42,11 @@ class VideoRendererBase():
         self.window_manager = WindowManager(
             image_size=self.props["sensor_size"],
             grid_size=(1, 1),
-            window_names=["eWiz: Video Renderer"],
+            window_names=["eWiz"],
             refresh_rate=1,
-            window_size=(720, 1080)
+            window_size=(720, 1080),
+            save_images=self.save_images,
+            save_dir=self.save_dir
         )
 
         # Initialize renderers
@@ -50,8 +56,8 @@ class VideoRendererBase():
     def _create_time_text(self, events: np.ndarray) -> str:
         """Creates time text.
         """
-        time_val = np.mean(events[:, 2])/10e3
-        time_text = "t = " + "%.1f" % time_val + " ms"
+        time_val = np.mean(events[:, 2])/1e6
+        time_text = "t = " + "%.2f" % time_val + " s"
         return time_text
 
     def play(self, *args, **kwargs) -> None:
