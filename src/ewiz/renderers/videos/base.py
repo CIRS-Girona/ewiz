@@ -78,3 +78,4 @@ class VideoRendererBase():
             self.window_manager.render(
                 rendered_image, texts=[self._create_time_text(events)], position=(15, 30)
             )
+        self.window_manager.create_gif()

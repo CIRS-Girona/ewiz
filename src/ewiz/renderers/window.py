@@ -1,5 +1,6 @@
 import os
 import cv2
+import imageio
 import numpy as np
 
 from PIL import Image
@@ -105,3 +106,17 @@ class WindowManager():
                 w = 0
                 h += 1
             cv2.waitKey(self.refresh_rate)
+
+    def create_gif(self) -> None:
+        """Creates GIF of saved images.
+        """
+        if self.save_images:
+            print("Creating GIF.")
+            for i, window_name in enumerate(self.window_names):
+                all_images = []
+                # TODO: Change video limit
+                for j in range(344):
+                    image_path = os.path.join(self.save_dirs[i], "image" + str(j) + ".png")
+                    all_images.append(imageio.imread(image_path))
+                imageio.mimsave(os.path.join(self.save_dirs[i], "video.gif"), all_images)
+                print("Done GIF.")
