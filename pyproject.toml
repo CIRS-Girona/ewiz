@@ -26,7 +26,8 @@ dependencies = [
     "inverse_optical_flow",
     "flow_vis",
     "roslibpy",
-    "bagpy"
+    "bagpy",
+    "imageio-ffmpeg"
 ]
 requires-python = ">= 3.8"
 description = "An all-in-one event-based data manipulation and processing library."

@@ -120,3 +120,18 @@ class WindowManager():
                     all_images.append(imageio.imread(image_path))
                 imageio.mimsave(os.path.join(self.save_dirs[i], "video.gif"), all_images)
                 print("Done GIF.")
+
+    # TODO: Data stride needs to be taken in consideration
+    def create_mp4(self) -> None:
+        """Creates GIF of saved images.
+        """
+        if self.save_images:
+            print("Creating MP4.")
+            for i, window_name in enumerate(self.window_names):
+                video_writer = imageio.get_writer(os.path.join(self.save_dirs[i], "video.mp4"), fps=12)
+                # TODO: Change video limit
+                for j in range(self.image_indices[0]):
+                    image_path = os.path.join(self.save_dirs[i], "image" + str(j) + ".png")
+                    video_writer.append_data(imageio.imread(image_path))
+                video_writer.close()
+                print("Done MP4.")
