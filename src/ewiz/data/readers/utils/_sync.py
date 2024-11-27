@@ -14,7 +14,7 @@ def inverse_flow(flow: np.ndarray) -> np.ndarray:
     """Inverses optical flow.
     """
     flow = flow.astype(np.float32)
-    flow, _ = inverse_optical_flow.avg_method(flow)
+    flow, _ = inverse_optical_flow.max_method(flow)
     flow = np.nan_to_num(flow)
     return flow
 

@@ -13,7 +13,9 @@ class LoaderBase():
         data_dir: str,
         data_stride: int = None,
         data_range: Tuple[int, int] = None,
-        reader_mode: str = "base"
+        reader_mode: str = "base",
+        *args,
+        **kwargs
     ) -> None:
         self.data_dir = data_dir
         self.data_stride = data_stride
@@ -21,6 +23,8 @@ class LoaderBase():
         self.reader_mode = reader_mode
         self.index = 0
         self.indices: np.ndarray = None
+        self.args = args
+        self.kwargs = kwargs
 
     def __iter__(self) -> Callable:
         """Returns iterator.
@@ -51,7 +55,7 @@ class LoaderBase():
         if self.reader_mode == "base":
             self.reader = ReaderBase(self.data_dir, clip_mode)
         elif self.reader_mode == "flow":
-            self.reader = ReaderFlow(self.data_dir, clip_mode)
+            self.reader = ReaderFlow(self.data_dir, clip_mode, *self.args, **self.kwargs)
         else:
             raise KeyError(
                 f"Reader mode key '{self.reader_mode}' is not supported."

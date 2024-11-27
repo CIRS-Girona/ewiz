@@ -14,9 +14,11 @@ class LoaderTime(LoaderBase):
         data_dir: str,
         data_stride: int = None,
         data_range: Tuple[int, int] = None,
-        reader_mode: str = "base"
+        reader_mode: str = "base",
+        *args,
+        **kwargs
     ) -> None:
-        super().__init__(data_dir, data_stride, data_range, reader_mode)
+        super().__init__(data_dir, data_stride, data_range, reader_mode, *args, **kwargs)
         self._init_reader(clip_mode="time")
         self._init_size()
         self._init_opts()
