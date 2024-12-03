@@ -106,3 +106,16 @@ reader = ReaderFlow(data_dir=data_dir, clip_mode="time")
 start, end = 100, 140
 events, gray_images, gray_time, flow = reader[start:end]
 ```
+#### Data Loaders
+The data loaders module allows for easy sequential data loading. In this example, we load the multi-modal data, and stride over it with a time interval of 20 ms.
+```python
+from ewiz.data.loaders import LoaderTime
+
+# Initialize data loader
+data_dir = "/path/to/dataset"
+loader = LoaderTime(data_dir=data_dir, data_stride=20)
+
+# Iterate over data
+for data in loader:
+    pass
+```
