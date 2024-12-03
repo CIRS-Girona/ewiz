@@ -173,7 +173,7 @@ The `flow.hdf5` file contains the following data:
 * The **flow to event indices** mapping, inside the `flow_to_events` dataset, which contains the flow mappings in a 1D array where the indices are the flow indices and the corresponding values are the event indices.
 * The **time to flow indices** mapping, inside the `time_to_flow` dataset, which contains the time mappings in a 1D array where the indices are the timestamps (in ms) and the corresponding values are the flow indices.
 
-> **Note:** When you are using the library you do not have to know the data format in detail. The included data readers and loaders automatically read the data and synchronizes it internally.
+> **Note:** When you are using the library you do not have to know the data format in detail. The included data readers and loaders automatically read the data and synchronize it internally.
 
 ## Citation
 This repository is related to the paper below. If you find this repository please do not hesitate to give it a star :star2:!
