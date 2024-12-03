@@ -12,6 +12,7 @@
 [Introduction](#introduction) •
 [Getting Started](#getting-started) •
 [Usage](#usage) •
+[Data Format](#data-format) •
 [Citation](#citation) •
 [Acknowledgements](#acknowledgements) •
 [Related Projects](#related-projects)
@@ -117,5 +118,66 @@ loader = LoaderTime(data_dir=data_dir, data_stride=20)
 
 # Iterate over data
 for data in loader:
-    pass
+    events, gray_images, gray_time, flow = data
+```
+
+#### Data Converters
+Convert datasets like MVSEC, and DSEC to the eWiz format for seamless integration. An example for the MVSEC dataset is shown below:
+```python
+from ewiz.data.converters import ConvertMVSEC
+
+mvsec_dir = "/path/to/MVSEC/dataset"
+out_dir = "/path/to/save/converted/dataset"
+mvsec_converter = ConvertMVSEC(mvsec_dir, out_dir)
+mvsec_converter.convert()
+```
+
+More examples can be found in the `scripts` folder. For example, `play_video.py` showcases how you can visualize datasets converted to the eWiz format. The `render_events.py` shows how to use the visualizers modules to visualize event-based data, grayscale images, and optical flow data side by side.
+
+## Data Format
+eWiz makes use of a compressed form of the HDF5 file format to save all data. Moreover, to avoid the use of time consuming sorted search algorithms, we use saved look-up arrays that map timestamps to data properties. Currently, eWiz saves the following data:
+* **Events:** Event-based data, which includes x and y-coordinates, timestamps (in &micro;s), and polarities.
+* **Grayscale Images:** The grayscale images captured by the camera in case of a hybrid sensor.
+* **Optical Flow:** Ground truth optical flow data, which can also be inverted if desired.
+
+### General Structure
+eWiz uses the BLOSC compression format for improved memory management and efficient data storage. All data is saved in a single folder containing multiple HDF5 files and one JSON file. Each HDF5 file contains a data type, whether events, grayscale images, or optical flow. In summary, the general data format is as follows:
+* A properties file, called `props.json`, it includes general properties about the dataset. Currently, we only save the `sensor_size` but we aim to add more properties.
+* A compilation of HDF5 files, containing the different components of the dataset. Currently, eWiz supports saving events, grayscale images, and optical flow data. They are saved in `events.hdf5`, `gray.hdf5`, and `flow.hdf5` respectively.
+
+> **Note:** Due to compression, you might not be able to read the data with a simple HDF5 viewer.
+
+All data files contain the `time_offset` HDF5 group. It is composed of a single value (in &micro;s) which indicates the starting timestamp of each sequence. This starting timestamp may not be the same for all data types, as the grayscale images for example have a different sampling rate than that of the events. For all data types to be synchronized, it is just a matter of adding the `time_offset` value to the timestamps of the desired data type.
+
+### Events
+The `events.hdf5` file contains the following data:
+* The `events` group, containing the events of the sequence, separated into 4 distinct datasets:
+  * The **x-coordinates**, inside the `x` dataset, of data type `uint16`, which contains the x-coordinates of the events in a 1D array, with values ranging from 0 to the width size of the sensor.
+  * The **y-coordinates**, inside the `y` dataset, of data type `uint16`, which contains the y-coordinates of the events in a 1D array, with values ranging from 0 to the height size of the sensor.
+  * The **timestamps**, inside the `time` dataset, of data type `int64`, which contains the timestamps (in &micro;s) of the events in a 1D array.
+  * The **polarities**, inside the `polarity` dataset, of data type `bool`, which contains the polarities of the events in a 1D array, with values ranging from 0 to the height size of the sensor.
+* The **time to event indices** mapping, inside the `time_to_events` dataset, which contains the time mappings in a 1D array where the indices are the timestamps (in ms) and the corresponding values are the event indices.
+
+### Grayscale Images
+The `gray.hdf5` file contains the following data:
+* The **grayscale images**, inside the `gray_images` dataset, of data type `uint8`, which contains the grayscale images in an array of *(number of images x height x width)*.
+* The **timestamps**, inside the `time` dataset, of data type `int64`, which contains the timestamps (in &micro;s) of the images in a 1D array.
+* The **grayscale to event indices** mapping, inside the `gray_to_events` dataset, which contains the grayscale mappings in a 1D array where the indices are the grayscale indices and the corresponding values are the event indices.
+* The **time to grayscale indices** mapping, inside the `time_to_gray` dataset, which contains the time mappings in a 1D array where the indices are the timestamps (in ms) and the corresponding values are the grayscale indices.
+
+### Optical Flow
+The `flow.hdf5` file contains the following data:
+* The **optical flow**, inside the `flows` dataset, of data type `int64`, which contains the optical flows in an array of *(number of flows x 2 x height x width)*.
+* The **timestamps**, inside the `time` dataset, of data type `int64`, which contains the timestamps (in &micro;s) of the flows in a 1D array.
+* The **flow to event indices** mapping, inside the `flow_to_events` dataset, which contains the flow mappings in a 1D array where the indices are the flow indices and the corresponding values are the event indices.
+* The **time to flow indices** mapping, inside the `time_to_flow` dataset, which contains the time mappings in a 1D array where the indices are the timestamps (in ms) and the corresponding values are the flow indices.
+
+> **Note:** When you are using the library you do not have to know the data format in detail. The included data readers and loaders automatically read the data and synchronizes it internally.
+
+## Citation
+This repository is related to the paper below. If you find this repository please do not hesitate to give it a star :star2:!
+```bibtex
+@article{ecarlaMansour2024,
+    year={2024}
+}
 ```

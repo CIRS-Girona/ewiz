@@ -6,7 +6,7 @@ from ewiz.renderers.videos import VideoRendererBase
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/Documents/datasets/stonefish/ewiz/stonefish_recording_08-11-2024_10-05-53"
-    save_dir = "/home/jad/Documents/datasets/stonefish/rendered_data/stonefish_recording_08-11-2024_10-05-53"
-    video_renderer = VideoRendererBase(data_dir, 80, save_images=True, save_dir=save_dir)
+    data_dir = "/home/jad/Documents/datasets/carla/ewiz/01_static_town2_backward_clear-sunset"
+    save_dir = "/home/jad/Documents/datasets/carla/rendered_data/01_static_town2_backward_clear-sunset"
+    video_renderer = VideoRendererBase(data_dir, 10, save_images=False, save_dir=save_dir)
     video_renderer.play()
