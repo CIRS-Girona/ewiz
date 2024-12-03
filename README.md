@@ -15,7 +15,8 @@
 [Data Format](#data-format) •
 [Citation](#citation) •
 [Acknowledgements](#acknowledgements) •
-[Related Projects](#related-projects)
+[Related Projects](#related-projects) •
+[Licensing](#licensing)
 
 </div>
 
@@ -181,3 +182,25 @@ This repository is related to the paper below. If you find this repository pleas
     year={2024}
 }
 ```
+Also, if you have any questions do not hesitate to contact me at [jad.mansour@udg.edu](mailto:jad.mansour@udg.edu).
+
+## Acknowledgements
+The study was supported by the **XXX**. The study was also supported in part by the SIREC project, funded by the Ministerio de Ciencia e Innovación, Gobierno de España under agreement no. [PID2020-116736RB-IOO]().
+
+This work was also inspired by the following repositories:
+* [Secrets of Event-based Optical Flow (T-PAMI 2024, ECCV 2022)](https://github.com/tub-rip/event_based_optical_flow)
+
+## Related Projects
+Related projects to this work are:
+
+* [eStonefish-Scenes: A Synthetic Event-based Optical Flow Dataset for Autonomous Underwater Vehicles]()
+* [eCARLA-Scenes: A Synthetic Event-based Optical Flow Dataset for Autonomous Field Vehicles]()
+
+## Licensing
+This project is licensed under the **GNU General Public License v3.0**.
+
+You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license. However, any derived work must also be open-source and distributed under the same license.
+
+For more details, see the [LICENSE](LICENSE) file in the repository or visit the official GPL-3.0 license page: [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+> 2024, Jad Mansour, University of Girona. All rights reserved.
