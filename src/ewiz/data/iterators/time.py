@@ -1,12 +1,12 @@
 import numpy as np
 
-from .base import LoaderBase
+from .base import IteratorBase
 from ..readers import ReaderBase, ReaderFlow
 
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-class LoaderTime(LoaderBase):
+class IteratorTime(IteratorBase):
     """Time data loader.
     """
     def __init__(

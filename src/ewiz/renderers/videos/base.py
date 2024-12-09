@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 from ewiz.core.props import import_props
-from ewiz.data.loaders import LoaderTime
+from ewiz.data.iterators import IteratorTime
 from ewiz.renderers import WindowManager
 from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, VisualizerFlow
 
@@ -33,7 +33,7 @@ class VideoRendererBase():
         """Initializes video.
         """
         # Initialize main modules
-        self.data_loader = LoaderTime(
+        self.data_loader = IteratorTime(
             data_dir=self.data_dir,
             data_stride=self.data_stride,
             data_range=self.data_range

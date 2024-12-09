@@ -5,7 +5,7 @@ from ..readers import ReaderBase, ReaderFlow
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-class LoaderBase():
+class IteratorBase():
     """Base data loader.
     """
     def __init__(

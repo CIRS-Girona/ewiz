@@ -1,13 +1,13 @@
 import numpy as np
 
-from .base import LoaderBase
+from .base import IteratorBase
 from ..readers import ReaderBase, ReaderFlow
 
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-class LoaderEvents(LoaderBase):
-    """Events data loader.
+class IteratorGray(IteratorBase):
+    """Grayscale images data loader.
     """
     def __init__(
         self,
@@ -19,7 +19,7 @@ class LoaderEvents(LoaderBase):
         **kwargs
     ) -> None:
         super().__init__(data_dir, data_stride, data_range, reader_mode, *args, **kwargs)
-        self._init_reader(clip_mode="events")
+        self._init_reader(clip_mode="images")
         self._init_size()
         self._init_opts()
         self._init_indices()
@@ -27,8 +27,9 @@ class LoaderEvents(LoaderBase):
     def _init_opts(self) -> None:
         """Initializes data options.
         """
+        # TODO: Check data stride
         if self.data_stride is None:
-            self.data_stride = 1e5
+            self.data_stride = 1
         if self.data_range is None:
             self.data_range = (0, self.data_size)
         elif self.data_range[1] < 0:

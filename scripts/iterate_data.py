@@ -2,15 +2,15 @@ import numpy as np
 import h5py
 import hdf5plugin
 
-from ewiz.data.loaders import LoaderEvents, LoaderTime
+from ewiz.data.iterators import IteratorEvents, IteratorTime
 
 from ewiz.renderers import WindowManager
 from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, VisualizerFlow
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/datasets/carla/ewiz/260p/static/01_static_town2_backward_clear-sunset"
-    data_loader = LoaderTime(
+    data_dir = "/home/jad/datasets/carla/ewiz/260p/peds/peds_town7_forward_clear-noon"
+    data_loader = IteratorTime(
         data_dir=data_dir,
         data_stride=40,
         reader_mode="flow",

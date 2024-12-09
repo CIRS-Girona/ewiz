@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 import hdf5plugin
 
-from ewiz.data.loaders import LoaderEvents, LoaderTime
+from ewiz.data.iterators import IteratorEvents, IteratorTime
 
 from ewiz.renderers import WindowManager
 from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray
@@ -10,7 +10,7 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray
 
 if __name__ == "__main__":
     data_dir = "/home/jad/Documents/datasets/converted/dsec/interlaken_00_a.bak0"
-    data_loader = LoaderEvents(
+    data_loader = IteratorEvents(
         data_dir=data_dir,
         data_stride=5e5,
         reader_mode="base"
