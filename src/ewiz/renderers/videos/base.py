@@ -9,7 +9,6 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, Visuali
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-# TODO: Continue code
 class VideoRendererBase():
     """Base video renderer.
     """
