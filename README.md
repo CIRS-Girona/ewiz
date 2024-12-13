@@ -178,14 +178,20 @@ The `flow.hdf5` file contains the following data:
 ## Citation
 This repository is related to the paper below. If you find this repository please do not hesitate to give it a star :star2:!
 ```bibtex
-@article{ecarlaMansour2024,
-    year={2024}
+@misc{mansourCarla2024,
+    title={eCARLA-scenes: A synthetically generated dataset for event-based optical flow prediction},
+    author={Jad Mansour and Hayat Rajani and Rafael Garcia and Nuno Gracias},
+    year={2024},
+    eprint={2412.09209},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    url={https://arxiv.org/abs/2412.09209},
 }
 ```
 Also, if you have any questions do not hesitate to contact me at [jad.mansour@udg.edu](mailto:jad.mansour@udg.edu).
 
 ## Acknowledgements
-The study was supported by the **XXX**. The study was also supported in part by the SIREC project, funded by the Ministerio de Ciencia e Innovación, Gobierno de España under agreement no. [PID2020-116736RB-IOO]().
+Jad Mansour was supported by the Joan Oró Grant no. 2024 FI-2 00762. The study was also supported in part by the SIREC project, funded by the Ministerio de Ciencia e Innovación, Gobierno de España under agreement no. PID2020-116736RB-IOO.
 
 This work was also inspired by the following repositories:
 * [Secrets of Event-based Optical Flow (T-PAMI 2024, ECCV 2022)](https://github.com/tub-rip/event_based_optical_flow)
@@ -193,8 +199,7 @@ This work was also inspired by the following repositories:
 ## Related Projects
 Related projects to this work are:
 
-* [eStonefish-Scenes: A Synthetic Event-based Optical Flow Dataset for Autonomous Underwater Vehicles]()
-* [eCARLA-Scenes: A Synthetic Event-based Optical Flow Dataset for Autonomous Field Vehicles]()
+* [eCARLA-Scenes: A Synthetic Event-based Optical Flow Dataset for Autonomous Field Vehicles](https://github.com/CIRS-Girona/ecarla-scenes)
 
 ## Licensing
 This project is licensed under the **GNU General Public License v3.0**.
