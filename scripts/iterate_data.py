@@ -9,22 +9,22 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, Visuali
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/datasets/carla/ewiz/260p/peds/peds_town7_forward_clear-noon"
+    data_dir = "/home/jad/Documents/datasets/stonefish/ewiz/low_resolution_sequence"
     data_loader = IteratorTime(
         data_dir=data_dir,
-        data_stride=40,
+        data_stride=20,
         reader_mode="flow",
-        inverse_flow=True
+        inverse_flow=False
     )
     window_manager = WindowManager(
-        image_size=(260, 346),
+        image_size=(128, 128),
         grid_size=(3, 2),
         window_names=["Events", "Grayscale", "Flow"],
         refresh_rate=0
     )
-    events_visualizer = VisualizerEvents(image_size=(260, 346))
-    gray_visualizer = VisualizerGray(image_size=(260, 346))
-    flow_visualizer = VisualizerFlow(image_size=(260, 346))
+    events_visualizer = VisualizerEvents(image_size=(128, 128))
+    gray_visualizer = VisualizerGray(image_size=(128, 128))
+    flow_visualizer = VisualizerFlow(image_size=(128, 128))
 
     # Iterate over data
     for events, gray_images, gray_time, flow in data_loader:

@@ -124,10 +124,12 @@ class ConvertStonefish(ConvertBase):
         for events_data in tqdm(events_messages):
             _, message, _ = events_data
             # TODO: Check why empty arrays
-            if len(message.events) > 1:
+            if len(message.events) >= 1:
                 events = self._extract_events(message)
                 events = events.astype(np.int64)
                 events[:, 2] -= self.min_time
+                # TODO: Should be done in Stonefish, sort the events based on timestamps
+                events = events[events[:, 2].argsort()]
                 self.events_writer.write(events=events)
         # Map time to events
         self.events_writer.map_time_to_events()

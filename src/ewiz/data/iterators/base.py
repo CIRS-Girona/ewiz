@@ -26,6 +26,9 @@ class IteratorBase():
         self.args = args
         self.kwargs = kwargs
 
+        # TODO: To avoid white images
+        self.data = None
+
     def __iter__(self) -> Callable:
         """Returns iterator.
         """
@@ -41,11 +44,12 @@ class IteratorBase():
             data = self.reader[start:end]
 
             # If events array is too small, we stop the iterator
-            if len(data[0]) < 1:
-                raise StopIteration
+            # TODO: Change approach
+            if len(data[0]) >= 1:
+                self.data = data
 
             self.index += 1
-            return data
+            return self.data
         raise StopIteration
 
     # TODO: Remove manual check
