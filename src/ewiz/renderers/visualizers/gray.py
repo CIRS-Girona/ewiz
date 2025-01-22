@@ -28,4 +28,5 @@ class VisualizerGray(VisualizerBase):
     def _generate_gray_image(self, gray_image: np.ndarray) -> np.ndarray:
         """Generates grayscale image.
         """
+        gray_image = gray_image.astype(np.uint8)
         return gray_image[..., None]

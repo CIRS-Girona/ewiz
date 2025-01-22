@@ -44,6 +44,7 @@ class VisualizerEvents(VisualizerBase):
 
         # Generate image
         events_image[h_coords, w_coords, :] = colors
+        events_image = events_image.astype(np.uint8)
         return events_image
 
     def _generate_events_mask(self, events: np.ndarray) -> np.ndarray:
