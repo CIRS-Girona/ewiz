@@ -23,6 +23,7 @@ class IteratorEvents(IteratorBase):
         self._init_size()
         self._init_opts()
         self._init_indices()
+        self._init_iter_size()
 
     def _init_opts(self) -> None:
         """Initializes data options.

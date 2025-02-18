@@ -30,7 +30,7 @@ class EncoderGaussian(EncoderBase):
                 /(np.max(split[:, 2]) - np.min(split[:, 2]))
             )
             encoded_events[0, :, :, i] = self._apply_gaussian(split[split[:, 3] > 0])
-            encoded_events[0, :, :, i] = self._apply_gaussian(split[split[:, 3] < 0])
+            encoded_events[1, :, :, i] = self._apply_gaussian(split[split[:, 3] == 0])
         encoded_events = encoded_events.astype(np.float32)
         return encoded_events
 

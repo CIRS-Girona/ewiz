@@ -30,6 +30,7 @@ class VisualizerBase():
         # TODO: Add render function
         self.render_func = None
         self.mask_func = None
+        self.mask_from_image_func = None
 
     # TODO: Add folder creation to utilities
     @staticmethod
@@ -73,4 +74,10 @@ class VisualizerBase():
         """Renders mask.
         """
         image = self.mask_func(*args, **kwargs)
+        return image
+
+    def render_mask_from_image(self, *args, **kwargs) -> np.ndarray:
+        """Renders mask from image.
+        """
+        image = self.mask_from_image_func(*args, **kwargs)
         return image

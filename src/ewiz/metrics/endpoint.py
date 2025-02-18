@@ -15,6 +15,7 @@ class EndpointError(MetricsBase):
     ) -> None:
         super().__init__(store_history)
         self.outlier_thresh = outlier_thresh
+        self._init_metrics()
 
     def _init_metrics(self) -> None:
         """Initializes metrics.

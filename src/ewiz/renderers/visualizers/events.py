@@ -10,26 +10,28 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 
 
 class VisualizerEvents(VisualizerBase):
-    """Events visualizer.
-    """
+    """Events visualizer."""
+
     def __init__(
         self,
         image_size: Tuple[int, int],
         save_images: bool = False,
         override_images: bool = False,
         image_prefix: str = None,
-        out_dir: str = None
+        out_dir: str = None,
     ) -> None:
         super().__init__(
             image_size, save_images, override_images, image_prefix, out_dir
         )
         self.render_func = self._generate_events_image
         self.mask_func = self._generate_events_mask
+        self.mask_from_image_func = self._generate_events_mask_from_encoding
 
     def _generate_events_image(self, events: np.ndarray) -> np.ndarray:
-        """Generates events image.
-        """
-        events_image = np.ones((self.image_size[0], self.image_size[1], 3), dtype=np.uint8)
+        """Generates events image."""
+        events_image = np.ones(
+            (self.image_size[0], self.image_size[1], 3), dtype=np.uint8
+        )
         events_image *= 255
         w_coords = events[:, 0].astype(np.int32)
         h_coords = events[:, 1].astype(np.int32)
@@ -48,8 +50,7 @@ class VisualizerEvents(VisualizerBase):
         return events_image
 
     def _generate_events_mask(self, events: np.ndarray) -> np.ndarray:
-        """Generates events mask.
-        """
+        """Generates events mask."""
         events_mask = np.zeros((self.image_size[0], self.image_size[1]), dtype=np.uint8)
         w_coords = events[:, 0].astype(np.int32)
         h_coords = events[:, 1].astype(np.int32)
@@ -57,3 +58,12 @@ class VisualizerEvents(VisualizerBase):
         # Generate mask
         events_mask[h_coords, w_coords] = 1
         return events_mask
+
+    def _generate_events_mask_from_encoding(
+        self, encoded_events: np.ndarray
+    ) -> np.ndarray:
+        """Generates events mask from encoded events image."""
+        events_mask = np.sum(np.sum(encoded_events, axis=3), axis=0)
+        events_mask[events_mask > 0] = 255
+        events_mask = events_mask.astype(np.uint8)
+        return events_mask[..., None]

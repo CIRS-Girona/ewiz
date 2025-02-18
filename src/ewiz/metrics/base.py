@@ -9,7 +9,6 @@ class MetricsBase():
     """
     def __init__(self, store_history: bool = False) -> None:
         self.store_history = store_history
-        self._init_metrics()
         self._init_history()
 
     def _init_metrics(self) -> None:
