@@ -1,0 +1,17 @@
+site_name: eWiz
+site_url: !ENV READTHEDOCS_CANONICAL_URL
+
+theme:
+  name: material
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+extra_javascript:
+  - javascript/readthedocs.js
+
+nav:
+  - Introduction: index.md
