@@ -5,6 +5,7 @@ theme:
   name: material
 
 plugins:
+  - search
   - mkdocstrings:
       handlers:
         python:
