@@ -9,7 +9,7 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, Visuali
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/Documents/datasets/stonefish/ewiz/estonefish_static_forward_reef"
+    data_dir = "/home/jad/datasets/test_network/ewiz/estonefish_static_down_reef"
     data_loader = IteratorTime(
         data_dir=data_dir,
         data_stride=100,

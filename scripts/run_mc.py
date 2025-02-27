@@ -17,10 +17,10 @@ from ewiz.algorithms.mc import MotionCompensationPyramidal
 if __name__ == "__main__":
     # Initialize data reader
     data_reader = ReaderBase(
-        data_dir="/home/jad/datasets/prophesee/ewiz/test4",
+        data_dir="/home/jad/Documents/datasets/stonefish/data/val/estonefish_static_forward_reef",
         clip_mode="time"
     )
-    events, _, _ = data_reader[12000:12050]
+    events, _, _ = data_reader[1000:1900]
 
     # Apply transforms
     ewiz_transforms = [EventsCenterCrop(in_size=(720, 1280), out_size=(720, 720))]
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         image_size=(720, 720),
         loss=mc_loss,
         optimizer="BFGS",
-        flow_inits=(-20000, 20000),
+        flow_inits=(-800, 800),
         scales=(1, 5)
     )
 

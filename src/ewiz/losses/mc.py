@@ -77,7 +77,7 @@ class LossMotionCompensation(LossBase):
             image_size=self.image_size,
             grid_size=(2, 2),
             window_names=["IWE"],
-            window_size=(720, 1080)
+            window_size=(720, 720)
         )
         self.events_visualizer = VisualizerEvents(
             image_size=self.image_size
@@ -159,7 +159,6 @@ class LossMotionCompensation(LossBase):
         """Calculates loss function.
         """
         # TODO: Change logic
-        events = events[events[:, 3] == 0]
         mc_args = self._parse_mc_args(events, dense_flow, patch_flow, render)
         mc_args = mc_args[0]
         loss_val = self.loss_func.calculate(**mc_args)
