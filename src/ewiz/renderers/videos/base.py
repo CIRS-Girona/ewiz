@@ -9,17 +9,33 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, Visuali
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
-class VideoRendererBase():
-    """Base video renderer.
+class VideoRendererBase:
+    """Dataset video renderer. Allows you to read and render a data sequence in the eWiz
+    format.
     """
+
     def __init__(
         self,
         data_dir: str,
         data_stride: int = None,
         data_range: Tuple[int, int] = None,
         save_images: bool = False,
-        save_dir: str = None
+        save_dir: str = None,
     ) -> None:
+        """
+        Args:
+            data_dir (str): Dataset directory, should be using the eWiz format.
+            data_stride (int, optional): Data stride. Defaults to None.
+            data_range (Tuple[int, int], optional): Data range. Defaults to None.
+            save_images (bool, optional): Saves generated images. Defaults to False.
+            save_dir (str, optional): Images save directory. Defaults to None.
+
+        Examples:
+            To render a dataset in the eWiz format, you just have to:
+
+            >>> video_renderer = VideoRendererBase(data_dir="/path/to/dataset")
+            >>> video_renderer.play()
+        """
         self.data_dir = data_dir
         self.data_stride = data_stride
         self.data_range = data_range
@@ -29,13 +45,12 @@ class VideoRendererBase():
         self._init_video()
 
     def _init_video(self) -> None:
-        """Initializes video.
-        """
+        """Initializes video."""
         # Initialize main modules
         self.data_loader = IteratorTime(
             data_dir=self.data_dir,
             data_stride=self.data_stride,
-            data_range=self.data_range
+            data_range=self.data_range,
         )
         # TODO: Change refresh rate
         self.window_manager = WindowManager(
@@ -45,7 +60,7 @@ class VideoRendererBase():
             refresh_rate=1,
             window_size=(720, 1080),
             save_images=self.save_images,
-            save_dir=self.save_dir
+            save_dir=self.save_dir,
         )
 
         # Initialize renderers
@@ -53,21 +68,21 @@ class VideoRendererBase():
         self.gray_visualizer = VisualizerGray(self.props["sensor_size"])
 
     def _create_time_text(self, events: np.ndarray) -> str:
-        """Creates time text.
-        """
-        time_val = np.mean(events[:, 2])/1e6
+        """Creates time text."""
+        time_val = np.mean(events[:, 2]) / 1e6
         time_text = "t = " + "%.2f" % time_val + " s"
         return time_text
 
     def play(self, *args, **kwargs) -> None:
-        """Plays video.
-        """
+        """Plays video."""
         for events, gray_images, gray_time in self.data_loader:
             events_image = self.events_visualizer.render_image(events=events)
             if gray_images is not None:
                 events_mask = self.events_visualizer.render_mask(events=events)
                 events_mask = np.repeat(np.expand_dims(events_mask, axis=2), 3, axis=2)
-                gray_image = self.gray_visualizer.render_image(gray_image=gray_images[0])
+                gray_image = self.gray_visualizer.render_image(
+                    gray_image=gray_images[0]
+                )
                 gray_image = np.repeat(gray_image, 3, axis=2)
                 rendered_image = np.where(events_mask, events_image, gray_image)
             else:
@@ -75,6 +90,8 @@ class VideoRendererBase():
 
             # TODO: Modify window manager format
             self.window_manager.render(
-                rendered_image, texts=[self._create_time_text(events)], position=(15, 30)
+                rendered_image,
+                texts=[self._create_time_text(events)],
+                position=(15, 30),
             )
         self.window_manager.create_mp4()

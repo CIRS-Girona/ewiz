@@ -10,9 +10,17 @@ plugins:
       handlers:
         python:
           paths: [src]
+          options:
+            docstring_style: google
+            merge_init_into_class: true
+            inherited_members: true
 
 extra_javascript:
   - javascript/readthedocs.js
 
 nav:
-  - Introduction: index.md
+  - Home: index.md
+  - API Reference:
+    - Overview: api-reference/index.md
+    - Data Readers: api-reference/data-readers.md
+    - Renderers: api-reference/renderers.md
