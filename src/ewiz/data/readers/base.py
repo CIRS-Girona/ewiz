@@ -38,6 +38,12 @@ class ReaderBase:
 
             >>> reader = ReaderBase(data_dir="/path/to/dataset", clip_mode="images")
             >>> events, grayscale, grayscale_timestamp = reader[7:11]
+
+            Let's say we want to get the raw events that took place between 30 and
+            40 ms, we run the data reader as follows:
+
+            >>> reader = ReaderBase(data_dir="/path/to/dataset", clip_mode="time")
+            >>> events, grayscale, grayscale_timestamp = reader[30:40]
         """
         self.data_dir = data_dir
         self.clip_mode = clip_mode
