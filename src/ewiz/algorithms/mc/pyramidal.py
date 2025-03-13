@@ -132,4 +132,16 @@ class MotionCompensationPyramidal(MotionCompensationBase):
         print("# ===== Optimization Done ===== #")
         patch_flows = update_fine_to_coarse_flow(patch_flows)
         print("# ===== Flow Refined ===== #")
+        self.patch_flows = patch_flows
         return patch_flows, optimizer_out
+
+    # TODO: Modify way I get flow
+    def get_dense_flow(self, scale: int) -> np.ndarray:
+        """Returns dense flow.
+        """
+        self._load_patch_configs(scale)
+        patch_flow = -self.patch_flows[scale].reshape((1, 2) + self.grid_size)[0]
+        patch_flow = np.transpose(patch_flow, (1, 2, 0))
+        dense_flow = skimage.transform.resize(patch_flow, self.image_size, anti_aliasing=True)
+        dense_flow = np.transpose(dense_flow, (2, 0, 1))
+        return dense_flow

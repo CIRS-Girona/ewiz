@@ -66,8 +66,8 @@ class FlowCenterCrop():
         """
         flow = flow.copy()
         offsets = (
-            int((flow.shape[2] - self.out_size[1])/2),
-            int((flow.shape[1] - self.out_size[0])/2)
+            int((flow.shape[1] - self.out_size[0])/2),
+            int((flow.shape[2] - self.out_size[1])/2)
         )
         flow = flow[:, offsets[0]:-offsets[0], offsets[1]:-offsets[1]]
         return flow

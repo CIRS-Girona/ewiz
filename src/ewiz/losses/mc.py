@@ -120,7 +120,7 @@ class LossMotionCompensation(LossBase):
             if self.get_visuals:
                 visuals.update({"start_iwe": start_events.clone().to("cpu").detach().numpy()})
                 # TODO: Change rendering logic
-                visuals["start_iwe"][:, :2] = np.clip(visuals["start_iwe"][:, :2], 0, 719)
+                visuals["start_iwe"][:, :2] = np.clip(visuals["start_iwe"][:, :2], 0, 255)
                 start_image = self.events_visualizer.render_image(visuals["start_iwe"])
                 self.window_manager.render(start_image)
         if "mid_iwe" in required_keys:
