@@ -171,8 +171,6 @@ class ConvertStonefish(ConvertBase):
         pol = np.where([event.polarity for event in events], 1, 0).astype(np.float64)
         events = np.empty((len(events), 4), dtype=np.float64)
         events[:, :2] = pos
-        # TODO: Fix orientation in Stonefish
-        events[:, 1] = (self.sensor_size[0] - 1) - events[:, 1]
         events[:, 2] = time
         events[:, 3] = pol
         return events

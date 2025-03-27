@@ -16,6 +16,10 @@ from ewiz.algorithms.mc import MotionCompensationPyramidal
 # Import metrics
 from ewiz.metrics.endpoint import EndpointError
 
+# Visualizer imports
+from ewiz.renderers.window import WindowManager
+from ewiz.renderers.visualizers import VisualizerFlow
+
 
 if __name__ == "__main__":
     # Read data
@@ -27,7 +31,7 @@ if __name__ == "__main__":
     ]
 
     # Below is the ground truth flow we are using for validation...
-    gt_flow = gt_flow / ((raw_events[-1, 2] - raw_events[0, 2]) * 1e-6)
+    gt_flow = gt_flow
 
     # Below is the predicted flow...
     pred_flow = None
@@ -75,9 +79,20 @@ if __name__ == "__main__":
 
     # Initialize endpoint error
     endpoint_error = EndpointError()
-    pred_flow = mc_pyramidal.get_dense_flow(4)
+    # Currently, there is an issue with conversion. For a 0.5 s sequence here, we use 0.05.
+    pred_flow = mc_pyramidal.get_dense_flow(4) * 0.05
     endpoint_error.calculate(pred_flow, gt_flow)
     print(endpoint_error.metrics["epe"])
-    pred_flow = mc_pyramidal.get_dense_flow(1)
-    endpoint_error.calculate(pred_flow, gt_flow)
-    print(endpoint_error.metrics["epe"])
+
+    flow_visualizer = VisualizerFlow(image_size=(256, 256), vis_type="arrows")
+    window_manager = WindowManager(
+        image_size=(256, 256),
+        grid_size=(2, 2),
+        window_names=["Ground Truth Flow", "Predicted Flow"],
+        refresh_rate=0,
+        save_images=False,
+        save_dir=None,
+    )
+    gt_image = flow_visualizer.render_image(gt_flow, scale=2.0)
+    pred_image = flow_visualizer.render_image(pred_flow, scale=2.0)
+    window_manager.render(gt_image, pred_image)
