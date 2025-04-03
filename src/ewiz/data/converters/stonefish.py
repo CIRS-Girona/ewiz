@@ -18,8 +18,7 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 
 # TODO: Add in separate utilities file
 def ros_message_to_cv_image(message: Any) -> np.ndarray:
-    """Converts ROS message to OpenCV image.
-    """
+    """Converts ROS message to OpenCV image."""
     image = np.frombuffer(message.data, dtype=np.uint8).reshape(
         message.height, message.width, -1
     )
@@ -28,8 +27,8 @@ def ros_message_to_cv_image(message: Any) -> np.ndarray:
 
 # TODO: Requires testing
 class ConvertStonefish(ConvertBase):
-    """Stonefish bag to eWiz data converter.
-    """
+    """Stonefish bag to eWiz data converter."""
+
     def __init__(
         self,
         data_dir: str,
@@ -37,7 +36,7 @@ class ConvertStonefish(ConvertBase):
         sensor_size: Tuple[int] = (260, 346),
         events_topic: str = "/bluerov2/sensors/events",
         rgb_topic: str = "/bluerov2/sensors/rgb/image_color",
-        flow_topic: str = "/bluerov2/sensors/flow/image_raw"
+        flow_topic: str = "/bluerov2/sensors/flow/image_raw",
     ) -> None:
         super().__init__(data_dir, out_dir, sensor_size)
         self.sensor_size = sensor_size
@@ -55,37 +54,32 @@ class ConvertStonefish(ConvertBase):
         self._get_min_time()
 
     def ros_flow_to_cv(self, message: Any) -> np.ndarray:
-        """Converts ROS message to OpenCV image.
-        """
+        """Converts ROS message to OpenCV image."""
         flow = self.bridge.imgmsg_to_cv2(message, desired_encoding="passthrough")
         return flow
 
     def _init_events(self) -> None:
-        """Initializes events bag file.
-        """
+        """Initializes events bag file."""
         self.bag_file = rosbag.Bag(self.data_dir)
 
         # TODO: Check removal
+
     def _init_images(self) -> None:
-        """Initializes images file.
-        """
+        """Initializes images file."""
         pass
 
     def _init_flow(self) -> None:
-        """Initializes optical flow.
-        """
+        """Initializes optical flow."""
         self.previous_time = None
 
     def _init_writers(self) -> None:
-        """Initializes writers.
-        """
+        """Initializes writers."""
         self.events_writer = WriterEvents(self.out_dir)
         self.gray_writer = WriterGray(self.out_dir)
         self.flow_writer = WriterFlow(self.out_dir)
 
     def _get_min_time(self) -> None:
-        """Gets minimum timestamp.
-        """
+        """Gets minimum timestamp."""
         # Get minimum events timestamp
         events_messages = self.bag_file.read_messages(topics=self.events_topic)
         for events_data in events_messages:
@@ -116,8 +110,7 @@ class ConvertStonefish(ConvertBase):
                 self.min_time = time
 
     def convert(self) -> None:
-        """Converts bag data.
-        """
+        """Converts bag data."""
         print("# === Converting Bag Data === #")
         print("# === Converting Events === #")
         events_messages = self.bag_file.read_messages(topics=self.events_topic)
@@ -162,11 +155,13 @@ class ConvertStonefish(ConvertBase):
     # --- Data Extractors --- #
     # ======================= #
     def _extract_events(self, message: Any) -> np.ndarray:
-        """Extracts events from ROS message.
-        """
+        """Extracts events from ROS message."""
         events = message.events
         pos = np.array([(event.x, event.y) for event in events], dtype=np.float64)
-        time = np.array([(event.ts.secs + event.ts.nsecs*1e-9)*1e6 for event in events], dtype=np.float64)
+        time = np.array(
+            [(event.ts.secs + event.ts.nsecs * 1e-9) * 1e6 for event in events],
+            dtype=np.float64,
+        )
         # TODO: Optimize polarity extraction
         pol = np.where([event.polarity for event in events], 1, 0).astype(np.float64)
         events = np.empty((len(events), 4), dtype=np.float64)
@@ -176,35 +171,35 @@ class ConvertStonefish(ConvertBase):
         return events
 
     def _extract_gray(self, message: Any) -> Tuple[np.ndarray, int]:
-        """Extracts grayscale data from ROS message.
-        """
+        """Extracts grayscale data from ROS message."""
         time = getattr(message, "header").stamp
-        time = int((time.secs + time.nsecs*1e-9)*1e6)
+        time = int((time.secs + time.nsecs * 1e-9) * 1e6)
         # TODO: Add missing pixels check
         gray_image = ros_message_to_cv_image(message)
         gray_image = gray_image[..., 0]
         return gray_image, time
 
     def _extract_rgb_to_gray(self, message: Any) -> Tuple[np.ndarray, int]:
-        """Extracts RGB data from ROS message.
-        """
+        """Extracts RGB data from ROS message."""
         time = getattr(message, "header").stamp
-        time = int((time.secs + time.nsecs*1e-9)*1e6)
+        time = int((time.secs + time.nsecs * 1e-9) * 1e6)
         # TODO: Add missing pixels check
         rgb_image = ros_message_to_cv_image(message)
         gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
         return gray_image, time
 
     def _extract_flow(self, message: Any) -> Tuple[np.ndarray, int]:
-        """Extracts flow data from ROS message.
-        """
+        """Extracts flow data from ROS message."""
         time = getattr(message, "header").stamp
-        time = int((time.secs + time.nsecs*1e-9)*1e6)
+        time = int((time.secs + time.nsecs * 1e-9) * 1e6)
         flow_image = self.ros_flow_to_cv(message)
-        flow_image = np.transpose(flow_image, axes=(2, 0, 1))
+        # TODO: Optical flow sensor, will be fixed inside Stonefish
+        flow_fixed = flow_image.copy()
+        flow_fixed = np.transpose(flow_fixed, axes=(2, 0, 1))
+        flow_fixed[1, ...] = -1 * flow_fixed[1, ...]
         if self.previous_time is not None:
             delta_time = time - self.previous_time
-            flow_image = flow_image*(delta_time*1e-6)
+            flow_fixed = flow_fixed * (delta_time * 1e-6)
         # Save previous time
         self.previous_time = time
-        return flow_image, time
+        return flow_fixed, time
