@@ -60,7 +60,7 @@ class EndpointError(MetricsBase):
         return flow
 
     def calculate_endpoint_error(
-        self, pred_flow: np.ndarray, gt_flow: np.ndarray, num_pixels: int
+        self, pred_flow: np.ndarray, gt_flow: np.ndarray, num_pixels: int, total_mask: np.ndarray
     ) -> None:
         """Calculates endpoint error.
         """
@@ -68,7 +68,9 @@ class EndpointError(MetricsBase):
         self.metrics["epe"] = np.mean(np.sum(endpoint_error, axis=(1, 2))/num_pixels)
         self.sum_metrics["epe"] += self.metrics["epe"]
         for thresh in self.outlier_thresh:
-            self.metrics[f"{thresh}pe"] = np.mean(np.sum(endpoint_error > thresh, axis=(1, 2))/num_pixels)
+            thresh_mask = endpoint_error < thresh
+            thesh_num_pixels = np.sum(total_mask*np.repeat(thresh_mask[:, None], repeats=2, axis=1), axis=(1, 2, 3)) + 1e-5
+            self.metrics[f"{thresh}pe"] = np.mean(np.sum(endpoint_error*thresh_mask, axis=(1, 2))/thesh_num_pixels)
             self.sum_metrics[f"{thresh}pe"] += self.metrics[f"{thresh}pe"]
 
     def calculate_angular_error(
@@ -104,6 +106,8 @@ class EndpointError(MetricsBase):
 
         flow_mask = self.get_flow_mask(gt_flow)
         if encoded_events is not None:
+            if len(encoded_events.shape) == 4:
+                encoded_events = encoded_events[None, :]
             events_mask = self.get_events_mask(encoded_events)
             total_mask = np.logical_and(flow_mask, events_mask)
         else:
@@ -116,7 +120,7 @@ class EndpointError(MetricsBase):
         if delta_time is not None:
             pred_flow = self.convert_flow_velocity_to_displacement(pred_flow, delta_time)
             gt_flow = self.convert_flow_velocity_to_displacement(gt_flow, delta_time)
-        self.calculate_endpoint_error(pred_flow, gt_flow, num_pixels)
+        self.calculate_endpoint_error(pred_flow, gt_flow, num_pixels, total_mask)
         self.calculate_angular_error(pred_flow, gt_flow, num_pixels)
         self.count += 1
         return self.metrics
