@@ -24,7 +24,7 @@ def ros_message_to_cv_image(message: Any) -> np.ndarray:
 
 
 # TODO: Check for missing pixels
-class ConvertBag(ConvertBase):
+class ConvertDAVIS(ConvertBase):
     """DAVIS bag to eWiz data converter."""
 
     def __init__(
@@ -32,8 +32,8 @@ class ConvertBag(ConvertBase):
         data_dir: str,
         out_dir: str,
         sensor_size: Tuple[int] = (260, 346),
-        events_topic: str = "/davis/left/events",
-        gray_topic: str = "/davis/left/image_raw",
+        events_topic: str = "/dvs/events",
+        gray_topic: str = "/dvs/image_raw",
     ) -> None:
         super().__init__(data_dir, out_dir, sensor_size)
         self.sensor_size = sensor_size
@@ -46,12 +46,8 @@ class ConvertBag(ConvertBase):
 
     def _init_events(self) -> None:
         """Initializes events bag file."""
-        for dir, subdirs, files in os.walk(self.data_dir):
-            for file in files:
-                if "_data.bag" in file:
-                    self.bag_path = os.path.join(dir, file)
-                    self.bag_file = rosbag.Bag(self.bag_path)
-                    break
+        self.bag_path = self.data_dir
+        self.bag_file = rosbag.Bag(self.bag_path)
 
     # TODO: Check removal
     def _init_images(self) -> None:
