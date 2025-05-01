@@ -77,10 +77,11 @@ class WindowManager():
         # Create windows
         h = 0
         w = 0
+        image_size = self.image_size if self.window_size is None else self.window_size
         for i in range(self.num_windows):
             cv2.namedWindow(self.window_names[i], 0)
-            h_coord = int(h*self.image_size[0]*1.8 + 100)
-            w_coord = int(w*self.image_size[1]*1.8 + 100)
+            h_coord = int(h*image_size[0]*1.1 + 100)
+            w_coord = int(w*image_size[1]*1.1 + 100)
             cv2.moveWindow(self.window_names[i], w_coord, h_coord)
             # TODO: Image creation
             image = self.numpy_to_cv(args[i])
