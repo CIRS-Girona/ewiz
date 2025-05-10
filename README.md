@@ -3,7 +3,7 @@
 </h1>
 
 <h4 align="center">
-    All-in-one Event-based Data Manipulation
+    All-in-one Event-based Data Manipulatio
 </h4>
 
 <div align="center">
