@@ -24,5 +24,6 @@ loss_functions = get_inheritors(parent=LossBase)
 
 # TODO: Check photometric loss format
 from .photometric import Photometric
+from .mse import MultiScaleMSE
 from .hybrid import LossHybrid
 from .mc import LossMotionCompensation

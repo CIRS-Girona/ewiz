@@ -28,7 +28,7 @@ class MultiScaleMSE(LossBase):
         self.alpha = alpha
         self.epsilon = epsilon
         self.device = device
-        self.mse_loss = nn.MSELoss(reduction=None)
+        self.mse_loss = nn.MSELoss(reduce=False)
         self.read_flag = False
         self.torch_resize = None
 
@@ -43,14 +43,32 @@ class MultiScaleMSE(LossBase):
         loss = torch.sum(loss)
         return loss
 
+    def _calculate_mse(
+        self, pred: torch.Tensor, gt: torch.Tensor, scale_factor: float
+    ) -> torch.Tensor:
+        """Calculates MSE."""
+        _, _, h, w = pred.shape
+        resized_gt = T.Resize((h, w), antialias=True)(gt) / scale_factor
+        flow_error = self.mse_loss(pred, resized_gt)
+        loss = self.calculate_charbonnier_loss(flow_error, self.alpha, self.epsilon)
+        return loss
+
     @LossBase.add_history
     @LossBase.catch_key_error
     def calculate(
         self,
-        pred: List[torch.Tensor],
+        preds: List[torch.Tensor],
         gt: torch.Tensor,
+        weights: Union[float, torch.Tensor] = [1.0, 1.0, 1.0, 1.0],
         *args,
         **kwargs,
     ) -> torch.Tensor:
         """Calculates loss function."""
-        return None
+        total_loss = 0.0
+        for i, pred in enumerate(preds):
+            scale_factor = gt.shape[-1] / pred.shape[-1]
+            mse_loss = self._calculate_mse(pred, gt, scale_factor) * weights[i]
+            total_loss += mse_loss
+        if self.direction == "minimize":
+            return total_loss
+        return -total_loss
