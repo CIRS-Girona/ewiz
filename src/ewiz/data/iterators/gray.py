@@ -32,7 +32,9 @@ class IteratorGray(IteratorBase):
         if self.data_stride is None:
             self.data_stride = 1
         if self.data_range is None:
-            self.data_range = (0, self.data_size)
+            # TODO: Temporary data fix
+            self.data_range = (1, self.data_size - 5)
+            print(self.data_range)
         elif self.data_range[1] < 0:
             self.data_range = (self.data_range[0], self.data_size - self.data_range[1])
 

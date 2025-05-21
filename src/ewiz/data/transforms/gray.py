@@ -64,7 +64,14 @@ class GrayCenterCrop:
             int((image.shape[0] - self.out_size[0]) / 2),
             int((image.shape[1] - self.out_size[1]) / 2),
         )
-        image = image[offsets[0] : -offsets[0], offsets[1] : -offsets[1]]
+
+        if offsets[0] == 0:
+            image = image[:, offsets[1] : -offsets[1]]
+        elif offsets[1] == 0:
+            image = image[offsets[0] : -offsets[0], :]
+        else:
+            image = image[offsets[0] : -offsets[0], offsets[1] : -offsets[1]]
+
         return image
 
 
