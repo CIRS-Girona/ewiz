@@ -19,6 +19,7 @@ def inverse_flow(flow: np.ndarray) -> np.ndarray:
     return flow
 
 
+# TODO: Needs to be tested, would appear in results
 class FlowSync:
     """Optical flow synchronizer."""
 
@@ -29,6 +30,8 @@ class FlowSync:
         self.time_offset = self.flow_file["time_offset"][0]
         self.time_to_flow = self.flow_file["time_to_flow"]
         self.flow_to_events = self.flow_file["flow_to_events"]
+
+        self._init_flows = self._init_flows_fast
 
     def _init_grids(self) -> None:
         """Initializes flow grids."""
@@ -44,6 +47,11 @@ class FlowSync:
         """Initializes flow masks."""
         self.mask_x = np.ones(self.grid_x.shape, dtype=bool)
         self.mask_y = np.ones(self.grid_y.shape, dtype=bool)
+
+    def _init_flows_fast(self, flow_x: np.ndarray, flow_y: np.ndarray, delta_time: float) -> None:
+        """Compensates for the time misalignment between initial flow and events start time."""
+        self.grid_x_init += flow_x*delta_time
+        self.grid_y_init += flow_y*delta_time
 
     def _propagate_flow(
         self, flow_x: np.ndarray, flow_y: np.ndarray, delta_time: float = 1.0
@@ -63,47 +71,58 @@ class FlowSync:
         )
 
         # Low flow refresh rate
-        occur_index = self.time_to_flow[start_time]
+        occur_index = max(self.time_to_flow[start_time] - 1, 0)
         flow_x = self.flows[occur_index, 0, :, :]
         flow_y = self.flows[occur_index, 1, :, :]
-        total_time = end_time / 1e3 - start_time / 1e3
+        # total_time = end_time / 1e3 - start_time / 1e3
+        # flows_time = (
+        #     self.flows_time[occur_index + 1] / 1e6 - self.flows_time[occur_index] / 1e6
+        # )
+
+        total_time = start_time / 1e3 - (self.flows_time[occur_index] + self.time_offset) / 1e6
         flows_time = (
             self.flows_time[occur_index + 1] / 1e6 - self.flows_time[occur_index] / 1e6
         )
-        if total_time <= flows_time:
-            flow_x = flow_x * total_time / flows_time
-            flow_y = flow_y * total_time / flows_time
-            sync_flow[0, ...] = flow_x
-            sync_flow[1, ...] = flow_y
-            # Inverse flow
-            if inverse:
-                sync_flow = inverse_flow(sync_flow)
-            return sync_flow
+        delta_time = total_time / flows_time
+
+        # if total_time <= flows_time:
+        #     flow_x = flow_x * total_time / flows_time
+        #     flow_y = flow_y * total_time / flows_time
+        #     sync_flow[0, ...] = flow_x
+        #     sync_flow[1, ...] = flow_y
+        #     # Inverse flow
+        #     if inverse:
+        #         sync_flow = inverse_flow(sync_flow)
+        #     return sync_flow
 
         # High flow refresh rate
         self._init_grids()
         self._init_masks()
-        total_time = self.flows_time[occur_index + 1] / 1e6 - start_time / 1e3
-        delta_time = total_time / flows_time
-        self._propagate_flow(flow_x, flow_y, delta_time)
-        occur_index += 1
+        # total_time = self.flows_time[occur_index + 1] / 1e6 - start_time / 1e3
+        # delta_time = total_time / flows_time
+        # self._propagate_flow(flow_x, flow_y, delta_time)
+        # occur_index += 1
+        self._init_flows(flow_x, flow_y, delta_time)
 
         # Accumulate flow displacements
-        while self.flows_time[occur_index + 1] / 1e6 < end_time / 1e3:
+        while (self.flows_time[occur_index] + self.time_offset) / 1e6 < end_time / 1e3:
             flow_x = self.flows[occur_index, 0, :, :]
             flow_y = self.flows[occur_index, 1, :, :]
-            self._propagate_flow(flow_x, flow_y)
+            total_time = end_time / 1e3 - (self.flows_time[occur_index] + self.time_offset) / 1e6
+            flows_time = self.flows_time[occur_index + 1] / 1e6 - self.flows_time[occur_index] / 1e6
+            delta_time = min(total_time / flows_time, 1.0)
+            self._propagate_flow(flow_x, flow_y, delta_time)
             occur_index += 1
 
         # Interpolate flow displacements
-        flow_x = self.flows[occur_index, 0, :, :]
-        flow_y = self.flows[occur_index, 1, :, :]
-        total_time = end_time / 1e3 - self.flows_time[occur_index] / 1e6
-        flows_time = (
-            self.flows_time[occur_index + 1] / 1e6 - self.flows_time[occur_index] / 1e6
-        )
-        delta_time = total_time / flows_time
-        self._propagate_flow(flow_x, flow_y, delta_time)
+        # flow_x = self.flows[occur_index, 0, :, :]
+        # flow_y = self.flows[occur_index, 1, :, :]
+        # total_time = end_time / 1e3 - self.flows_time[occur_index] / 1e6
+        # flows_time = (
+        #     self.flows_time[occur_index + 1] / 1e6 - self.flows_time[occur_index] / 1e6
+        # )
+        # delta_time = total_time / flows_time
+        # self._propagate_flow(flow_x, flow_y, delta_time)
 
         # Compute flow shift
         shift_x = self.grid_x - self.grid_x_init
