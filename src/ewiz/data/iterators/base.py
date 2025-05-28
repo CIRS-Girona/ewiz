@@ -73,7 +73,7 @@ class IteratorBase():
     def _init_iter_size(self) -> None:
         """Initializes data size.
         """
-        self.iter_size = len(self.indices) - 1
+        self.iter_size = len(self.indices)
 
     def _init_indices(self) -> None:
         """Initializes data indices.
