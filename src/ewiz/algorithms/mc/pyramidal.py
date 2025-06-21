@@ -124,7 +124,7 @@ class MotionCompensationPyramidal(MotionCompensationBase):
         )
         return loss
 
-    def optimize(self, events: np.ndarray) -> None:
+    def optimize(self, events: np.ndarray, store_flow: bool = False) -> None:
         """Main optimization function."""
         print("# ===== Starting Optimization ===== #")
         print(f"Total degrees of freedom is {2*self.total_num_patches}...")
@@ -133,6 +133,8 @@ class MotionCompensationPyramidal(MotionCompensationBase):
         patch_flows = update_fine_to_coarse_flow(patch_flows)
         print("# ===== Flow Refined ===== #")
         self.patch_flows = patch_flows
+        if store_flow:
+            self.optimized_patch_flows = self.patch_flows.copy()
         return patch_flows, optimizer_out
 
     # TODO: Modify way I get flow
