@@ -9,20 +9,17 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerGray, Visuali
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/datasets/test_network/ewiz/estonefish_static_down_reef"
+    data_dir = "/home/jad/datasets/poster_flow/poster_tv_sequence_flow"
     data_loader = IteratorTime(
-        data_dir=data_dir,
-        data_stride=100,
-        reader_mode="flow",
-        inverse_flow=False
+        data_dir=data_dir, data_stride=100, reader_mode="flow", inverse_flow=False
     )
     window_manager = WindowManager(
         image_size=(720, 1280),
         grid_size=(3, 2),
         window_names=["Events", "Grayscale", "Flow"],
         refresh_rate=2,
-        save_images=True,
-        save_dir="/home/jad/Documents/datasets/stonefish/visuals/estonefish_static_forward_reef"
+        save_images=False,
+        save_dir="/home/jad/Documents/datasets/stonefish/visuals/estonefish_static_forward_reef",
     )
     events_visualizer = VisualizerEvents(image_size=(720, 1280))
     gray_visualizer = VisualizerGray(image_size=(720, 1280))
@@ -35,4 +32,4 @@ if __name__ == "__main__":
         flow_image = flow_visualizer.render_image(flow=flow)
         # Render frame
         window_manager.render(events_image, gray_image, flow_image)
-    window_manager.create_mp4()
+    # window_manager.create_mp4()

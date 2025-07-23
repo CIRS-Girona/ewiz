@@ -9,15 +9,13 @@ from ewiz.renderers.visualizers import VisualizerEvents, VisualizerFlow
 
 
 if __name__ == "__main__":
-    data_dir = "/home/jad/Documents/datasets/converted/mvsec/indoor_flying1"
+    data_dir = "/home/jad/datasets/poster_flow/poster_tv_sequence_flow"
     clip_mode = "images"
     data = ReaderFlow(data_dir=data_dir, clip_mode=clip_mode)
     events, gray_images, gray_time, flow = data[700:705]
 
     window_manager = WindowManager(
-        image_size=(260, 346),
-        grid_size=(2, 2),
-        window_names=["Events", "Flow"]
+        image_size=(260, 346), grid_size=(2, 2), window_names=["Events", "Flow"]
     )
     events_visualizer = VisualizerEvents(image_size=(260, 346))
     flow_visualizer = VisualizerFlow(image_size=(260, 346))

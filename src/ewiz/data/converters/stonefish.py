@@ -13,6 +13,9 @@ from tqdm import tqdm
 from .base import ConvertBase
 from ..writers import WriterEvents, WriterGray, WriterFlow
 
+from ewiz.data.transforms import Compose
+from ewiz.data.transforms.events import EventsClip
+
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
@@ -37,15 +40,20 @@ class ConvertStonefish(ConvertBase):
         events_topic: str = "/bluerov2/sensors/events",
         rgb_topic: str = "/bluerov2/sensors/rgb/image_color",
         flow_topic: str = "/bluerov2/sensors/flow/image_raw",
+        clip_size: bool = False,
     ) -> None:
         super().__init__(data_dir, out_dir, sensor_size)
         self.sensor_size = sensor_size
         self.events_topic = events_topic
         self.rgb_topic = rgb_topic
         self.flow_topic = flow_topic
+        self.clip_size = clip_size
 
         # OpenCV bridge
         self.bridge = CvBridge()
+
+        if self.clip_size:
+            self.transform = Compose([EventsClip(self.sensor_size)], True)
 
         self._init_events()
         self._init_images()
@@ -119,8 +127,10 @@ class ConvertStonefish(ConvertBase):
             # TODO: Check why empty arrays
             if len(message.events) >= 1:
                 events = self._extract_events(message)
-                events = events.astype(np.int64)
+                if self.clip_size:
+                    events = self.transform(events)
                 events[:, 2] -= self.min_time
+                events = events.astype(np.int64)
                 # TODO: Should be done in Stonefish, sort the events based on timestamps
                 events = events[events[:, 2].argsort()]
                 self.events_writer.write(events=events)
@@ -196,7 +206,7 @@ class ConvertStonefish(ConvertBase):
         # TODO: Optical flow sensor, will be fixed inside Stonefish
         flow_fixed = flow_image.copy()
         flow_fixed = np.transpose(flow_fixed, axes=(2, 0, 1))
-        flow_fixed[1, ...] = -1 * flow_fixed[1, ...]
+        flow_fixed[1, ...] = 1 * flow_fixed[1, ...]
         if self.previous_time is not None:
             delta_time = time - self.previous_time
             flow_fixed = flow_fixed * (delta_time * 1e-6)

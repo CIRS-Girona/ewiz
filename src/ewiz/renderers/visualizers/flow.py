@@ -66,7 +66,20 @@ class VisualizerFlow(VisualizerBase):
         _, h, w = flow.shape
         for y in range(0, h, sample_every):
             for x in range(0, w, sample_every):
-                if mask[y, x] > 0:
+                if mask is not None:
+                    if mask[y, x] > 0:
+                        dx, dy = flow[:, y, x]
+                        start_point = (x, y)
+                        end_point = (int(x + scale * dx), int(y + scale * dy))
+                        cv2.arrowedLine(
+                            image,
+                            start_point,
+                            end_point,
+                            (0, 255, 0),
+                            thickness=1,
+                            tipLength=0.3,
+                        )
+                else:
                     dx, dy = flow[:, y, x]
                     start_point = (x, y)
                     end_point = (int(x + scale * dx), int(y + scale * dy))

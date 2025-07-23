@@ -99,6 +99,12 @@ class ConvertDAVIS(ConvertBase):
             _, message, _ = gray_data
             gray_image, time = self._extract_gray(message)
             time -= self.min_time
+            if (
+                gray_image.shape[0] != self.sensor_size[0]
+                or gray_image.shape[1] != self.sensor_size[1]
+            ):
+                gray_image = np.zeros(self.sensor_size)
+                continue
             self.gray_writer.write(gray_image, time)
         # Map time to grayscale images
         self.gray_writer.map_time_to_gray()

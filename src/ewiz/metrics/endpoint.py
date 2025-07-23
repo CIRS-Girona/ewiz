@@ -5,6 +5,7 @@ from .base import MetricsBase
 from typing import Any, Dict, List, Tuple, Callable, Union
 
 
+# TODO: Fix weights and uncertainty
 class EndpointError(MetricsBase):
     """Endpoint error metric."""
 
@@ -65,11 +66,30 @@ class EndpointError(MetricsBase):
         gt_flow: np.ndarray,
         num_pixels: int,
         total_mask: np.ndarray,
+        covariance: np.ndarray = None,
     ) -> None:
         """Calculates endpoint error."""
         endpoint_error = np.linalg.norm(gt_flow - pred_flow, axis=1)
-        self.metrics["epe"] = np.mean(np.sum(endpoint_error, axis=(1, 2)) / num_pixels)
+
+        if covariance is not None:
+            det = (
+                covariance[:, 0, 0] * covariance[:, 1, 1]
+                - covariance[:, 0, 1] * covariance[:, 1, 0]
+            )  # (B, H, W)
+            det = np.clip(det, a_min=1e-12, a_max=None)
+            area = np.pi * np.sqrt(det)  # (B, H, W)
+            weights = 1.0 / (area + 1e-6)
+            weights *= total_mask.astype(np.float32)
+        else:
+            weights = total_mask.astype(np.float32)
+        weighted_error = endpoint_error * weights
+
+        self.metrics["epe"] = np.mean(
+            np.sum(weighted_error, axis=(1, 2)) / np.sum(weights, axis=(1, 2))
+        )
         self.sum_metrics["epe"] += self.metrics["epe"]
+
+        # TODO: Check how to apply this on here
         for thresh in self.outlier_thresh:
             thresh_mask = endpoint_error < thresh
             thresh_num_pixels = (
@@ -86,27 +106,43 @@ class EndpointError(MetricsBase):
             self.sum_metrics[f"{thresh}pe"] += self.metrics[f"{thresh}pe"]
 
     def calculate_angular_error(
-        self, pred_flow: np.ndarray, gt_flow: np.ndarray, num_pixels: int
+        self,
+        pred_flow: np.ndarray,
+        gt_flow: np.ndarray,
+        num_pixels: int,
+        covariance: np.ndarray = None,
+        total_mask: np.ndarray = None,
     ) -> None:
-        """Calculates angular error."""
+        """Calculates angular error, optionally weighted by uncertainty."""
+
         pred_u, pred_v = pred_flow[:, 0, ...], pred_flow[:, 1, ...]
         gt_u, gt_v = gt_flow[:, 0, ...], gt_flow[:, 1, ...]
+
+        # Cosine formula for angular error
+        cos_sim = (1.0 + pred_u * gt_u + pred_v * gt_v) / (
+            np.sqrt(1.0 + pred_u**2 + pred_v**2) * np.sqrt(1.0 + gt_u**2 + gt_v**2)
+        )
+        angular_error = np.arccos(np.clip(cos_sim, -1.0, 1.0))  # (B, H, W)
+
+        if covariance is not None:
+            # Compute ellipse area from 2x2 covariances
+            det = (
+                covariance[:, 0, 0] * covariance[:, 1, 1]
+                - covariance[:, 0, 1] * covariance[:, 1, 0]
+            )  # shape: (B, H, W)
+            det = np.clip(det, a_min=1e-12, a_max=None)
+            area = np.pi * np.sqrt(det)  # (B, H, W)
+            weights = 1.0 / (area + 1e-6)  # inverse area
+            if total_mask is not None:
+                weights *= total_mask.astype(np.float32)
+        else:
+            weights = np.ones_like(angular_error, dtype=np.float32)
+            if total_mask is not None:
+                weights *= total_mask.astype(np.float32)
+
+        weighted_error = angular_error * weights
         self.metrics["ae"] = np.mean(
-            np.sum(
-                np.arccos(
-                    np.clip(
-                        (1.0 + pred_u * gt_u + pred_v * gt_v)
-                        / (
-                            np.sqrt(1.0 + pred_u * pred_u + pred_v * pred_v)
-                            * np.sqrt(1.0 + gt_u * gt_u + gt_v * gt_v)
-                        ),
-                        -1.0,
-                        1.0,
-                    )
-                ),
-                axis=(1, 2),
-            )
-            / num_pixels
+            np.sum(weighted_error, axis=(1, 2)) / np.sum(weights, axis=(1, 2))
         )
         self.sum_metrics["ae"] += self.metrics["ae"]
 

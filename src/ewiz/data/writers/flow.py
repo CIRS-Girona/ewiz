@@ -11,31 +11,29 @@ from typing import Any, Dict, List, Tuple, Callable, Union
 
 
 class WriterFlow(WriterBase):
-    """Data writer for flow data.
-    """
+    """Data writer for flow data."""
+
     def __init__(self, out_dir: str) -> None:
         super().__init__(out_dir)
         self._init_events()
         self._init_flow()
 
     def _init_events(self) -> None:
-        """Initializes events HDF5 file.
-        """
+        """Initializes events HDF5 file."""
         self.events_path = os.path.join(self.out_dir, "events.hdf5")
         self.events_file = h5py.File(self.events_path, "a")
         self.events_flag = False
 
     def _init_flow(self) -> None:
-        """Initializes flow file.
-        """
+        """Initializes flow file."""
         self.flow_path = os.path.join(self.out_dir, "flow.hdf5")
         self.flow_file = h5py.File(self.flow_path, "a")
         self.flow_flag = False
+        self.uncertainty_flag = False
 
     # TODO: Check data type
     def write(self, flow: np.ndarray, time: int) -> None:
-        """Main data writing function.
-        """
+        """Main data writing function."""
         flow = flow[None, ...].astype(np.float64)
         image_size = (flow.shape[2], flow.shape[3])
 
@@ -48,15 +46,21 @@ class WriterFlow(WriterBase):
 
             # Create HDF5 groups
             self.flows = self.flow_file.create_dataset(
-                name="flows", data=flow,
-                chunks=True, maxshape=(None, 2, *image_size), dtype=np.float64,
-                **self.compressor
+                name="flows",
+                data=flow,
+                chunks=True,
+                maxshape=(None, 2, *image_size),
+                dtype=np.float64,
+                **self.compressor,
             )
             time: np.ndarray = np.array(time, dtype=np.int64)[None, ...]
             self.flows_time = self.flow_file.create_dataset(
-                name="time", data=time - self.time_offset,
-                chunks=True, maxshape=(None,), dtype=np.int64,
-                **self.compressor
+                name="time",
+                data=time - self.time_offset,
+                chunks=True,
+                maxshape=(None,),
+                dtype=np.int64,
+                **self.compressor,
             )
             self.flow_flag = True
         else:
@@ -68,31 +72,51 @@ class WriterFlow(WriterBase):
             self.flows_time.resize(all_points, axis=0)
             self.flows_time[-data_points:] = time - self.time_offset
 
+    def write_uncertainty(self, uncertainty: np.ndarray) -> None:
+        """Main data writing function."""
+        print(uncertainty.shape)
+        uncertainty = uncertainty[None, ...].astype(np.float64)
+        image_size = (uncertainty.shape[-2], uncertainty.shape[-1])
+
+        if self.uncertainty_flag is False:
+            self.uncertainties = self.flow_file.create_dataset(
+                name="covariances",
+                data=uncertainty,
+                chunks=True,
+                maxshape=(None, 2, 2, *image_size),
+                dtype=np.float64,
+                **self.compressor,
+            )
+            self.uncertainty_flag = True
+        else:
+            new_elements = uncertainty.shape[0]
+            previous_elements = self.uncertainties.shape[0]
+            all_elements = previous_elements + new_elements
+            self.uncertainties.resize(all_elements, axis=0)
+            self.uncertainties[-new_elements:] = uncertainty
+
     # TODO: Check time offset here
     def map_time_to_flow(self) -> None:
-        """Maps timestamps to flow indices.
-        """
+        """Maps timestamps to flow indices."""
         events_group = self.events_file["events"]
         events_time = events_group["time"]
         events_time_offset = self.events_file["time_offset"]
         print("# === Mapping Timestamps to Flow Indices === #")
-        start_value = np.floor(events_time[0]/1e3)
-        end_value = np.ceil(events_time[-1]/1e3)
-        sorted_data = (self.flows_time[:] + self.time_offset)/1e3
+        start_value = np.floor(events_time[0] / 1e3)
+        end_value = np.ceil(events_time[-1] / 1e3)
+        sorted_data = (self.flows_time[:] + self.time_offset) / 1e3
         data_file = self.flow_file
         data_name = "time_to_flow"
-        offset_value = events_time_offset[0]/1e3
+        offset_value = events_time_offset[0] / 1e3
 
         # TODO: Review arguments
         self.map_data_in_memory(
-            start_value, end_value, sorted_data,
-            data_file, data_name, offset_value
+            start_value, end_value, sorted_data, data_file, data_name, offset_value
         )
 
     # TODO: Check value difference
     def map_flow_to_events(self) -> None:
-        """Maps flow indices to events indices.
-        """
+        """Maps flow indices to events indices."""
         events_group = self.events_file["events"]
         events_time = events_group["time"]
         events_time_offset = self.events_file["time_offset"]
@@ -111,7 +135,15 @@ class WriterFlow(WriterBase):
 
         # TODO: Review arguments
         self.map_data_out_memory(
-            start_value, end_value, sorted_data,
-            data_file, data_name, offset_value, side, chunks,
-            addition, division, array_value
+            start_value,
+            end_value,
+            sorted_data,
+            data_file,
+            data_name,
+            offset_value,
+            side,
+            chunks,
+            addition,
+            division,
+            array_value,
         )
